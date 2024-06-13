@@ -1,0 +1,67 @@
+import mesa
+from agent import EconomicAgent, CopAgent
+
+class EconomicModel(mesa.Model):
+    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, tax_rate = 0):
+        super().__init__()
+        self.num_agents = num_econ_agents
+        self.num_cops = initial_cops
+
+        #create scheduler for movement and voting
+        self.schedule = mesa.time.RandomActivation(self)
+        #space
+        self.grid = mesa.space.MultiGrid(width, height, torus = True)
+
+        #parameters
+        self.sentence_length = sentence_length
+        self.prosperity = 0.05 #global prosperity if we want to model a dynamic economy, use as a multiplier for trade
+        self.tax_rate = tax_rate
+        self.election_frequency = election_frequency
+
+        #vars
+        self.votes = 0
+        
+        #counters, this will have to be replaced with a datacollector
+        self.num_crimes_committed = 0
+        self.num_arrests_made = 0
+        self.total_stolen = 0
+        self.total_trade_income = 0
+        self.steps = 0
+        
+        # create agents
+        for i in range(self.num_agents):
+            a = EconomicAgent(i, self)
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+            self.schedule.add(a)
+            self.grid.place_agent(a, (x, y))
+        for i in range(self.num_cops):
+            c = CopAgent(i, self)
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+            self.schedule.add(c)
+            self.grid.place_agent(c, (x, y))
+
+    def step(self):
+        self.steps += 1
+        self.schedule.step()
+        if (self.steps -1) / self.election_frequency == 1 and self.steps != 1:       
+            if self.votes >0:
+                self.tax_rate += 0.01
+            else:
+
+                self.tax_rate -= 0.01
+        
+            # Adjusting the number of cops to voting results  
+            self.num_cops = self.tax_rate/0.01
+            cops = [x for x in self.agents if isinstance(x, CopAgent)]
+
+            if len(cops) < self.num_cops:
+                c = CopAgent(self.next_id(), model = self)
+                x = self.random.randrange(self.grid.width)
+                y = self.random.randrange(self.grid.height)
+                self.schedule.add(c)        
+                self.grid.place_agent(c, (x, y))
+            else:
+                cops[0].remove()
+                self.schedule.remove(cops[0])
