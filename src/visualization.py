@@ -7,7 +7,7 @@ import nest_asyncio
 from model import EconomicModel
 from agent import EconomicAgent, CopAgent
 
-model = EconomicModel(num_econ_agents=30, initial_cops=3, width=10, height = 10)
+model = EconomicModel(num_econ_agents=30, initial_cops=0, width=10, height = 10)
 for i in range(200):
     print('step ' + str(i))
     # print the amount of agents where has_committed_crime_this_turn is True

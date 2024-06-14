@@ -99,8 +99,9 @@ class EconomicAgent(mesa.Agent):
         #calculate value of the threat of being robbed using the interactions queue
         # if that value is greater than current tax rate then vote to increase
         if len(self.q_interactions) >0:
-            crime_rate = sum(self.q_interactions)/len(self.q_interactions)
-            print('crime rate', crime_rate)
+            crime_rate = sum(self.q_interactions)/self.model.interaction_memory
+            # print('interaction queue', self.q_interactions)
+            # print('crime rate', crime_rate)
         else: crime_rate = 0
         theft_threat = crime_rate* self.wealth * 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
@@ -120,12 +121,19 @@ class EconomicAgent(mesa.Agent):
         )
         for neighbor in neighbors:
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
+                self.q_crime_perception.append(0)
                 self.num_crimes_witnessed += 1
-                if neighbor.is_arrested:
-                    self.num_punishments_witnessed += 1
-                    self.q_crime_perception.append(1)
-                else:
-                    self.q_crime_perception.append(0)
+                # if neighbor.is_arrested:
+                #     self.num_punishments_witnessed += 1
+                #     self.q_crime_perception.append(1)
+                #     print('i saw a crime and they got arrested')
+                # else:
+                #     self.q_crime_perception.append(0)
+
+                # # remove the first element of the queue if it's too long
+                # if len(self.q_crime_perception) > self.model.interaction_memory:
+                #     self.q_crime_perception.pop(0)
+                # # print('crime perception queue', self.q_crime_perception)
     def step(self):
         self.has_traded_this_turn = False
         self.has_committed_crime_this_turn = False
@@ -172,12 +180,27 @@ class CopAgent(mesa.Agent):
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
                 self.arrest(neighbor)
     def arrest(self, criminal_agent):
+        print('arrested')
         criminal_agent.wealth = 1 #TODO
         criminal_agent.is_arrested = True
         criminal_agent.time_until_released = self.model.sentence_length 
         #not sure if this is gonna work right, the idea is that once they're arrested and in jail, ppl are no longer observing the crime being committed
         criminal_agent.has_committed_crime_this_turn = False
         self.model.num_arrests_made += 1
+
+        # make the arrest announcement
+        neighbors = self.model.grid.get_neighbors(
+            self.pos,
+            moore=True,
+            include_center=True,
+            radius=1  # Vision radius
+        )
+        for neighbor in neighbors:
+            if isinstance(neighbor, EconomicAgent):
+                neighbor.q_crime_perception.append(1)
+                # remove the first element of the queue if it's too long
+                if len(neighbor.q_crime_perception) > neighbor.model.interaction_memory:
+                    neighbor.q_crime_perception.pop(0)
     def step(self):
         self.move()
         self.look_for_crimes()
