@@ -48,10 +48,10 @@ class EconomicModel(mesa.Model):
         self.schedule.step()
         if (self.steps-1)%self.election_frequency == 0 and self.steps != 1:
             if self.votes >0:
-                print('The people have voted to increase taxes')
+                print('The people have voted to increase taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
                 self.tax_rate += 0.01
             else:
-                print('The people have voted to decrease taxes')
+                print('The people have voted to decrease taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
                 self.tax_rate -= 0.01
         
             # Adjusting the number of cops to voting results  
@@ -67,3 +67,5 @@ class EconomicModel(mesa.Model):
             else:
                 cops[0].remove()
                 self.schedule.remove(cops[0])
+            # reset the votes
+            self.votes = 0

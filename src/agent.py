@@ -180,7 +180,6 @@ class CopAgent(mesa.Agent):
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
                 self.arrest(neighbor)
     def arrest(self, criminal_agent):
-        print('arrested')
         criminal_agent.wealth = 1 #TODO
         criminal_agent.is_arrested = True
         criminal_agent.time_until_released = self.model.sentence_length 
