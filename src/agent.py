@@ -29,6 +29,8 @@ class EconomicAgent(mesa.Agent):
 
         self.arrest_aversion = 1 # how painful being in jail is to them
 
+        self.money_made_trading = 0
+
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
@@ -53,8 +55,11 @@ class EconomicAgent(mesa.Agent):
             if other is not None: #redundant?
                 # TODO add some scaling that will make the poorer person benefit less
                 # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
-                other.wealth += (other.wealth + self.wealth)* self.model.prosperity 
-                self.wealth += (other.wealth + self.wealth)* self.model.prosperity
+                money_gain = (other.wealth + self.wealth)* self.model.prosperity
+                other.wealth += money_gain
+                other.money_made_trading += money_gain
+                self.wealth +=  money_gain
+                self.money_made_trading += money_gain
                 # print('own and other wealth after: ' ,self.wealth, other.wealth)
 
                 self.num_interactions +=1

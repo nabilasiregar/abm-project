@@ -51,7 +51,8 @@ class EconomicModel(mesa.Model):
         self.datacollector = DataCollector(
             {"No. crimes committed this turn": lambda m: self.num_crimes_committed_turn,
             "Total trades made this turn": lambda m: self.trades_made_turn,
-            "Arrested agents": lambda m: self.arrested_agents}
+            "Arrested agents": lambda m: self.arrested_agents,
+            "Total Money made trading": lambda m: self.total_trade_income}
         )
 
         self.running = True
@@ -62,8 +63,7 @@ class EconomicModel(mesa.Model):
         self.num_crimes_committed_turn = 0
         self.trades_made_turn = 0
         self.arrested_agents = 0
-
-
+        self.total_trade_income = 0
 
         for agent in self.agents:
 
@@ -74,6 +74,7 @@ class EconomicModel(mesa.Model):
                     self.trades_made_turn += 1
                 if agent.is_arrested:
                     self.arrested_agents += 1
+                self.total_trade_income += agent.money_made_trading
                 
 
 
