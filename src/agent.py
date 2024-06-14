@@ -16,11 +16,15 @@ class EconomicAgent(mesa.Agent):
         self.num_interactions = 0
         self.num_crimes_witnessed = 0 # how many crimes has this agent seen happen
         self.num_punishments_witnessed = 0 # how many crimes have been punished
+        self.num_been_crimed = 0 # how many times has this agent been stolen from
+
+        self.q_crime_perception = [] # a queue of crimes witnessed, 1 if punished, 0 if not
+        self.q_interactions = [] # a queue of interactions, 0 if trade, 1 if theft
 
         self.has_traded_this_turn = False # only keep true for 1 step of the scheduler
-
         self.has_committed_crime_this_turn = False # only keep true for 1 step of the scheduler, allows cops to arrest
         self.is_arrested = False
+
         self.time_until_released = 0 # countdown of jail sentence
 
         self.arrest_aversion = 1 # how painful being in jail is to them
@@ -57,21 +61,36 @@ class EconomicAgent(mesa.Agent):
                 other.num_interactions +=1
                 self.has_traded_this_turn = True
                 other.has_traded_this_turn = True
-            
+                self.q_interactions.append(0)
+                other.q_interactions.append(0)
+                # remove the first element of the queue if it's too long
+                if len(self.q_interactions) > self.model.interaction_memory:
+                    self.q_interactions.pop(0)
+                if len(self.q_crime_perception) > self.model.interaction_memory:
+                    self.q_crime_perception.pop(0)   
     def steal(self, other):
         theft_value = other.wealth/2
         self.wealth += theft_value
-        
         other.wealth -= theft_value
-        self.has_committed_crime_this_turn = True                
-        self.num_interactions +=1
 
+        self.has_committed_crime_this_turn = True      
+        other.num_been_crimed += 1          
+        self.num_interactions +=1
+        other.num_interactions +=1
+        self.q_interactions.append(1)
+        other.q_interactions.append(1)
+        # remove the first element of the queue if it's too long
+        if len(self.q_interactions) > self.model.interaction_memory:
+            self.q_interactions.pop(0)
+        if len(self.q_crime_perception) > self.model.interaction_memory:
+            self.q_crime_perception.pop(0)
 
     def decide_action(self, other):
         '''Decide whether to steal or trade'''
         # TODO calculations of expected value to determine action
-        if self.num_crimes_witnessed > 0:
-            arrest_chance = self.num_punishments_witnessed/self.num_crimes_witnessed
+        if len(self.q_crime_perception) > 0:
+            # use self.q_crime_perception to calculate arrest chance
+            arrest_chance = sum(self.q_crime_perception)/len(self.q_crime_perception)
         else: arrest_chance = 0
         expected_punishment_pain = self.wealth + self.arrest_aversion * self.model.sentence_length
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
@@ -83,10 +102,11 @@ class EconomicAgent(mesa.Agent):
         else:
             return 'steal'
     def vote(self):
-        #calculate value of the threat of being robbed as product of crime rate and how much you'd have stolen
+        #calculate value of the threat of being robbed using the interactions queue
         # if that value is greater than current tax rate then vote to increase
-        if self.num_interactions >0:
-            crime_rate = self.num_crimes_witnessed/self.num_interactions # TODO fix this
+        if len(self.q_interactions) >0:
+            crime_rate = sum(self.q_interactions)/len(self.q_interactions)
+            print('crime rate', crime_rate)
         else: crime_rate = 0
         theft_threat = crime_rate* self.wealth * 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
@@ -94,12 +114,9 @@ class EconomicAgent(mesa.Agent):
             return 1
         else:
             return -1
-
-
     def pay_tax(self):
         #wealth tax, could use income tax instead? then the EU calculations are a bit harder
         self.wealth -= self.wealth * self.model.tax_rate
-    
     def check_for_crimes(self):
         neighbors = self.model.grid.get_neighbors(
             self.pos,
@@ -110,8 +127,11 @@ class EconomicAgent(mesa.Agent):
         for neighbor in neighbors:
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
                 self.num_crimes_witnessed += 1
-
-
+                if neighbor.is_arrested:
+                    self.num_punishments_witnessed += 1
+                    self.q_crime_perception.append(1)
+                else:
+                    self.q_crime_perception.append(0)
     def step(self):
         self.has_traded_this_turn = False
         self.has_committed_crime_this_turn = False
@@ -131,9 +151,10 @@ class EconomicAgent(mesa.Agent):
             self.check_for_crimes()
         self.pay_tax() # or maybe you should only pay tax when you make a trade? idk
         
-        if self.model.steps / self.model.election_frequency == 1:
+        if (self.model.steps)%self.model.election_frequency == 0:
             vote = self.vote() #returns +/- 1
             self.model.votes += vote
+
 
 class CopAgent(mesa.Agent):
     def __init__(self, unique_id, model):

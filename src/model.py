@@ -2,7 +2,7 @@ import mesa
 from agent import EconomicAgent, CopAgent
 
 class EconomicModel(mesa.Model):
-    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, tax_rate = 0):
+    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5):
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = initial_cops
@@ -15,8 +15,9 @@ class EconomicModel(mesa.Model):
         #parameters
         self.sentence_length = sentence_length
         self.prosperity = 0.05 #global prosperity if we want to model a dynamic economy, use as a multiplier for trade
-        self.tax_rate = tax_rate
+        self.tax_rate = initial_cops*0.01
         self.election_frequency = election_frequency
+        self.interaction_memory = interaction_memory
 
         #vars
         self.votes = 0
@@ -45,11 +46,12 @@ class EconomicModel(mesa.Model):
     def step(self):
         self.steps += 1
         self.schedule.step()
-        if (self.steps -1) / self.election_frequency == 1 and self.steps != 1:       
+        if (self.steps-1)%self.election_frequency == 0 and self.steps != 1:
             if self.votes >0:
+                print('The people have voted to increase taxes')
                 self.tax_rate += 0.01
             else:
-
+                print('The people have voted to decrease taxes')
                 self.tax_rate -= 0.01
         
             # Adjusting the number of cops to voting results  
