@@ -56,6 +56,7 @@ class EconomicAgent(mesa.Agent):
                 self.num_interactions +=1
                 other.num_interactions +=1
                 self.has_traded_this_turn = True
+                other.has_traded_this_turn = True
             
     def steal(self, other):
         theft_value = other.wealth/2
