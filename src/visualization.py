@@ -4,6 +4,9 @@ from mesa.visualization.modules import ChartModule
 import nest_asyncio
 # nest_asyncio.apply()
 
+from model import EconomicModel
+from agent import EconomicAgent, CopAgent
+
 model = EconomicModel(num_econ_agents=30, initial_cops=0, width=10, height = 10)
 for i in range(500):
     # print('step ' + str(i))
@@ -62,5 +65,5 @@ server = ModularServer(EconomicModel,
                        {"num_econ_agents": num_econ_agents, "initial_cops": initial_cops, "width": gridsize, "height": gridsize})
 
 # Run the server
-server.port = 8575
+server.port = 8545
 server.launch()
