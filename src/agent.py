@@ -61,13 +61,10 @@ class EconomicAgent(mesa.Agent):
                 other.num_interactions +=1
                 self.has_traded_this_turn = True
                 other.has_traded_this_turn = True
-                self.q_interactions.append(0)
                 other.q_interactions.append(0)
                 # remove the first element of the queue if it's too long
-                if len(self.q_interactions) > self.model.interaction_memory:
-                    self.q_interactions.pop(0)
-                if len(self.q_crime_perception) > self.model.interaction_memory:
-                    self.q_crime_perception.pop(0)   
+                if len(other.q_interactions) > other.model.interaction_memory:
+                    other.q_interactions.pop(0)
     def steal(self, other):
         theft_value = other.wealth/2
         self.wealth += theft_value
@@ -77,13 +74,10 @@ class EconomicAgent(mesa.Agent):
         other.num_been_crimed += 1          
         self.num_interactions +=1
         other.num_interactions +=1
-        self.q_interactions.append(1)
         other.q_interactions.append(1)
         # remove the first element of the queue if it's too long
-        if len(self.q_interactions) > self.model.interaction_memory:
-            self.q_interactions.pop(0)
-        if len(self.q_crime_perception) > self.model.interaction_memory:
-            self.q_crime_perception.pop(0)
+        if len(other.q_interactions) > other.model.interaction_memory:
+            other.q_interactions.pop(0)
 
     def decide_action(self, other):
         '''Decide whether to steal or trade'''
