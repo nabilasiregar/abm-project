@@ -17,6 +17,8 @@ class EconomicAgent(mesa.Agent):
         self.num_crimes_witnessed = 0 # how many crimes has this agent seen happen
         self.num_punishments_witnessed = 0 # how many crimes have been punished
 
+        self.has_traded_this_turn = False # only keep true for 1 step of the scheduler
+
         self.has_committed_crime_this_turn = False # only keep true for 1 step of the scheduler, allows cops to arrest
         self.is_arrested = False
         self.time_until_released = 0 # countdown of jail sentence
@@ -53,6 +55,7 @@ class EconomicAgent(mesa.Agent):
 
                 self.num_interactions +=1
                 other.num_interactions +=1
+                self.has_traded_this_turn = True
             
     def steal(self, other):
         theft_value = other.wealth/2
@@ -109,6 +112,8 @@ class EconomicAgent(mesa.Agent):
 
 
     def step(self):
+        self.has_traded_this_turn = False
+        self.has_committed_crime_this_turn = False
         #if they're in jail they don't do anything
         if self.is_arrested:
             self.time_until_released -=1
