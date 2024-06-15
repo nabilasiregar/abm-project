@@ -2,6 +2,7 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.UserParam import Slider
+from mesa.visualization.ModularVisualization import VisualizationElement
 
 from model import EconomicModel
 from agent import EconomicAgent, CopAgent
@@ -80,10 +81,33 @@ grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
 cop_chart = ChartModule([{"Label": "num_cops",
                       "Color": "Black"}],
                     data_collector_name='datacollector')
+
+class LegendElement(VisualizationElement):
+    package_includes = []
+    local_includes = []
+
+    def __init__(self):
+        self.js_code = """
+        document.addEventListener("DOMContentLoaded", function() {
+            var legendElement = document.createElement('div');
+            legendElement.innerHTML = `
+            <div id="legend" style="position:fixed; z-index:1000; right:10%; top:10%; background:white; padding:10px; border:1px solid black; border-radius:10px;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><span style="background-color: red; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Committed Crime</li>
+                    <li><span style="background-color: green; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Traded</li>
+                    <li><span style="background-color: black; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Economic Agent</li>
+                    <li><span style="background-color: blue; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Cop</li>
+                </ul>
+            </div>`;
+            document.body.appendChild(legendElement);
+        });
+        """
+
+legend = LegendElement()
  
 # Create the server
 server = ModularServer(EconomicModel,
-                       [grid, cop_chart],
+                       [grid, cop_chart, legend],
                        "EconomicModel",
                        {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
                         "interaction_memory": Slider("interaction_memory", 20, 1, 100, 1), 
