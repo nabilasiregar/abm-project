@@ -48,7 +48,8 @@ class EconomicModel(mesa.Model):
         # add data collecor
         self.datacollector = mesa.DataCollector(
             model_reporters = {'num_crimes_committed': 'num_crimes_committed',
-                               'num_arrests_made': 'num_arrests_made'},
+                               'num_arrests_made': 'num_arrests_made',
+                               'num_cops': 'num_cops',},
             agent_reporters = {'wealth': 'wealth'}
         )
 
@@ -74,6 +75,7 @@ class EconomicModel(mesa.Model):
                 self.schedule.add(c)        
                 self.grid.place_agent(c, (x, y))
             else:
+                cops[0].pos = None
                 cops[0].remove()
                 self.schedule.remove(cops[0])
             # reset the votes
