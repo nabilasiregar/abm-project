@@ -16,8 +16,6 @@ from agent import EconomicAgent, CopAgent
 #     model.step()
 
 gridsize = 10
-num_econ_agents = 30
-initial_cops = 0
 
 # Define a function to draw the agents
 def agent_portrayal(agent):
