@@ -1,6 +1,6 @@
 import mesa
 from mesa.datacollection import DataCollector
-
+import numpy as np
 from agent import EconomicAgent, CopAgent
 
 class EconomicModel(mesa.Model):
@@ -48,14 +48,19 @@ class EconomicModel(mesa.Model):
 
         # add data collecor
         self.datacollector = mesa.DataCollector(
-            model_reporters = {'Step': 'steps',
-                               'num_cops': 'num_cops',
-                                'num_crimes_committed': 'num_crimes_committed',
-                               'num_arrests_made': 'num_arrests_made',
-                               'tax_rate': 'tax_rate',
-                               'total_stolen' : 'total_stolen',
-                               'total_trade_income' : 'total_trade_income'
-                               },
+            model_reporters = {
+                'Step': 'steps',
+                'num_cops': 'num_cops',
+                'num_crimes_committed': 'num_crimes_committed',
+                'num_arrests_made': 'num_arrests_made',
+                'tax_rate': 'tax_rate',
+                'total_stolen': 'total_stolen',
+                'total_trade_income': 'total_trade_income',
+                'avg_wealth': lambda m: np.mean([agent.wealth for agent in m.schedule.agents if isinstance(agent, EconomicAgent)]),
+                'total_wealth': lambda m: sum(agent.wealth for agent in m.schedule.agents if isinstance(agent, EconomicAgent)),
+                'avg_crime_perception': lambda m: np.mean([sum(agent.q_crime_perception) / len(agent.q_crime_perception) if len(agent.q_crime_perception) > 0 else 0 for agent in m.schedule.agents if isinstance(agent, EconomicAgent)]),
+                'vote_outcome': 'votes'
+            },
             agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed'})
           
 
