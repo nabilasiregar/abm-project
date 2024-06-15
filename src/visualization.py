@@ -1,8 +1,7 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
-import nest_asyncio
-# nest_asyncio.apply()
+from mesa.visualization.UserParam import Slider
 
 from model import EconomicModel
 from agent import EconomicAgent, CopAgent
@@ -17,8 +16,6 @@ from agent import EconomicAgent, CopAgent
 #     model.step()
 
 gridsize = 10
-num_econ_agents = 30
-initial_cops = 0
 
 # Define a function to draw the agents
 def agent_portrayal(agent):
@@ -51,27 +48,46 @@ def agent_portrayal(agent):
             }
 
     elif isinstance(agent, CopAgent):
-        portrayal = {
-            "Shape": "circle",
-            "Color": "blue",
-            "Filled": "true",
-            "Layer": 0,
-            "r": 0.5
-        }
+        # if the agent is a cop, color blue
+
+        if agent.pos is not None:
+            portrayal = {
+                "Shape": "circle",
+                "Color": "blue",
+                "Filled": "true",
+                "Layer": 0,
+                "r": 0.5
+            }
+        else:
+            portrayal = {
+                "Shape": "circle",
+                "Color": "rgba(0, 0, 0, 0.001)",
+                "Filled": "true",
+                "Layer": 0,
+                "r": 0.5
+            }
     return portrayal
 
 # Create a grid visualization
 grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
 
-chart = ChartModule([{"Label": "num_arrests_made",
+# # Create a chart visualization
+# chart = ChartModule([{"Label": "num_arrests_made",
+#                       "Color": "Black"}],
+#                     data_collector_name='datacollector')
+
+# create a chart of the amount of cops
+cop_chart = ChartModule([{"Label": "num_cops",
                       "Color": "Black"}],
                     data_collector_name='datacollector')
  
 # Create the server
 server = ModularServer(EconomicModel,
-                       [grid, chart],
+                       [grid, cop_chart],
                        "EconomicModel",
-                       {"num_econ_agents": num_econ_agents, "initial_cops": initial_cops, "width": gridsize, "height": gridsize})
+                       {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
+                        "interaction_memory": Slider("interaction_memory", 20, 1, 100, 1), 
+                        "sentence_length": Slider("sentence_length", 15, 1, 50, 2), "width": gridsize, "height": gridsize})
 
 # Run the server
 server.port = 8545

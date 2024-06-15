@@ -56,8 +56,9 @@ class EconomicModel(mesa.Model):
                                'total_stolen' : 'total_stolen',
                                'total_trade_income' : 'total_trade_income'
                                },
-            agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed'}
-        )
+            agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed'})
+          
+
 
     def step(self):
         self.steps += 1
@@ -81,6 +82,7 @@ class EconomicModel(mesa.Model):
                 self.schedule.add(c)        
                 self.grid.place_agent(c, (x, y))
             else:
+                cops[0].pos = None
                 cops[0].remove()
                 self.schedule.remove(cops[0])
             # reset the votes

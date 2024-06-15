@@ -51,12 +51,13 @@ class EconomicAgent(mesa.Agent):
             return other
     def make_trade(self, other):
             if other is not None: #redundant?
+                self.model.total_trade_income += (other.wealth + self.wealth)* self.model.prosperity
                 # TODO add some scaling that will make the poorer person benefit less
                 # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
                 other.wealth += (other.wealth + self.wealth)* self.model.prosperity 
                 self.wealth += (other.wealth + self.wealth)* self.model.prosperity
                 # print('own and other wealth after: ' ,self.wealth, other.wealth)
-
+                
                 self.num_interactions +=1
                 other.num_interactions +=1
                 self.has_traded_this_turn = True
@@ -70,6 +71,8 @@ class EconomicAgent(mesa.Agent):
         theft_value = other.wealth/2
         self.wealth += theft_value
         other.wealth -= theft_value
+        self.model.total_stolen += theft_value
+        self.model.num_crimes_committed += 1
 
         self.has_committed_crime_this_turn = True      
         other.num_been_crimed += 1          
