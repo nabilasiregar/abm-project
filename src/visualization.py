@@ -62,10 +62,14 @@ def agent_portrayal(agent):
 
 # Create a grid visualization
 grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
+
+chart = ChartModule([{"Label": "num_arrests_made",
+                      "Color": "Black"}],
+                    data_collector_name='datacollector')
  
 # Create the server
 server = ModularServer(EconomicModel,
-                       [grid],
+                       [grid, chart],
                        "EconomicModel",
                        {"num_econ_agents": num_econ_agents, "initial_cops": initial_cops, "width": gridsize, "height": gridsize})
 

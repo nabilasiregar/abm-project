@@ -1,4 +1,6 @@
 import mesa
+from mesa.datacollection import DataCollector
+
 from agent import EconomicAgent, CopAgent
 
 class EconomicModel(mesa.Model):
@@ -43,6 +45,13 @@ class EconomicModel(mesa.Model):
             self.schedule.add(c)
             self.grid.place_agent(c, (x, y))
 
+        # add data collecor
+        self.datacollector = mesa.DataCollector(
+            model_reporters = {'num_crimes_committed': 'num_crimes_committed',
+                               'num_arrests_made': 'num_arrests_made'},
+            agent_reporters = {'wealth': 'wealth'}
+        )
+
     def step(self):
         self.steps += 1
         self.schedule.step()
@@ -69,3 +78,5 @@ class EconomicModel(mesa.Model):
                 self.schedule.remove(cops[0])
             # reset the votes
             self.votes = 0
+
+        self.datacollector.collect(self)
