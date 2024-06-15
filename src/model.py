@@ -1,4 +1,5 @@
 import mesa
+from mesa.datacollection import DataCollector
 from agent import EconomicAgent, CopAgent
 
 class EconomicModel(mesa.Model):
@@ -42,10 +43,29 @@ class EconomicModel(mesa.Model):
             y = self.random.randrange(self.grid.height)
             self.schedule.add(c)
             self.grid.place_agent(c, (x, y))
+        
+        # collect data
+        self.datacollector = DataCollector(
+            model_reporters={
+                "tax_rate": lambda m: m.tax_rate,
+                "num_crimes_committed": lambda m: m.num_crimes_committed,
+                "num_arrests": lambda m: m.num_arrests_made,
+                "total_stolen": lambda m: m.total_stolen,
+                "total_trade_income": lambda m: m.total_trade_income,
+            },
+            agent_reporters={
+                "wealth": lambda a: a.wealth if isinstance(a, EconomicAgent) else None,
+                "criminality": lambda a: a.criminality if isinstance(a, EconomicAgent) else None,
+                "has_committed_crime": lambda a: a.has_committed_crime_this_turn if isinstance(a, EconomicAgent) else None,
+                "is_arrested": lambda a: a.is_arrested if isinstance(a, EconomicAgent) else None,
+            }
+        )
 
     def step(self):
         self.steps += 1
         self.schedule.step()
+        self.datacollector.collect(self)
+
         if (self.steps-1)%self.election_frequency == 0 and self.steps != 1:
             if self.votes >0:
                 print('The people have voted to increase taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
