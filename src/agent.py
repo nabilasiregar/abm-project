@@ -1,5 +1,6 @@
 import mesa
 import numpy as np
+from collections import deque
 
 class EconomicAgent(mesa.Agent):
     'money-seeking agent'
@@ -18,8 +19,8 @@ class EconomicAgent(mesa.Agent):
         self.num_punishments_witnessed = 0 # how many crimes have been punished
         self.num_been_crimed = 0 # how many times has this agent been stolen from
 
-        self.q_crime_perception = [] # a queue of crimes witnessed, 1 if punished, 0 if not
-        self.q_interactions = [] # a queue of interactions, 0 if trade, 1 if theft
+        self.q_crime_perception = deque([], maxlen=model.interaction_memory) # a queue of crimes witnessed, 1 if punished, 0 if not
+        self.q_interactions = deque([], maxlen=model.interaction_memory) # a queue of interactions, 0 if trade, 1 if theft
 
         self.has_traded_this_turn = False # only keep true for 1 step of the scheduler
         self.has_committed_crime_this_turn = False # only keep true for 1 step of the scheduler, allows cops to arrest
