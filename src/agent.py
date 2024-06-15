@@ -65,6 +65,7 @@ class EconomicAgent(mesa.Agent):
                 # remove the first element of the queue if it's too long
                 if len(other.q_interactions) > other.model.interaction_memory:
                     other.q_interactions.pop(0)
+                self.model.total_trade_income += 2*( (other.wealth + self.wealth)* self.model.prosperity )
     def steal(self, other):
         theft_value = other.wealth/2
         self.wealth += theft_value
@@ -78,6 +79,9 @@ class EconomicAgent(mesa.Agent):
         # remove the first element of the queue if it's too long
         if len(other.q_interactions) > other.model.interaction_memory:
             other.q_interactions.pop(0)
+        self.model.num_crimes_committed += 1
+        self.model.total_stolen += theft_value
+
 
     def decide_action(self, other):
         '''Decide whether to steal or trade'''
@@ -112,6 +116,7 @@ class EconomicAgent(mesa.Agent):
     def pay_tax(self):
         #wealth tax, could use income tax instead? then the EU calculations are a bit harder
         self.wealth -= self.wealth * self.model.tax_rate
+        self.model.total_tax_paid += self.wealth * self.model.tax_rate
     def check_for_crimes(self):
         neighbors = self.model.grid.get_neighbors(
             self.pos,
