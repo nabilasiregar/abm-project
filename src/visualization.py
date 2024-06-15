@@ -87,20 +87,22 @@ class LegendElement(VisualizationElement):
     local_includes = []
 
     def __init__(self):
-        new_element = """
-        var legendElement = document.createElement('div');
-        legendElement.innerHTML = `
-        <div id="legend" style="position:fixed; z-index:1000; right:10%; top:20%; background:white; padding:10px; border:1px solid black; border-radius:10px;">
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                <li><span style="background-color: red; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Committed Crime</li>
-                <li><span style="background-color: green; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Traded</li>
-                <li><span style="background-color: black; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Economic Agent</li>
-                <li><span style="background-color: blue; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Cop</li>
-            </ul>
-        </div>`;
-        document.body.appendChild(legendElement);
+        self.js_code = """
+        document.addEventListener("DOMContentLoaded", function() {
+            var legendElement = document.createElement('div');
+            legendElement.innerHTML = `
+            <div id="legend" style="position:fixed; z-index:1000; right:10%; top:20%; background:white; padding:10px; border:1px solid black; border-radius:10px;">
+                <h3>Legend</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li><span style="background-color: red; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Committed Crime</li>
+                    <li><span style="background-color: green; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Traded</li>
+                    <li><span style="background-color: black; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Economic Agent</li>
+                    <li><span style="background-color: blue; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Cop</li>
+                </ul>
+            </div>`;
+            document.body.appendChild(legendElement);
+        });
         """
-        self.js_code = new_element
 
 legend = LegendElement()
  
