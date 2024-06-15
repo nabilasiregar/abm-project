@@ -87,7 +87,9 @@ cop_chart = ChartModule([{"Label": "num_cops",
 server = ModularServer(EconomicModel,
                        [grid, cop_chart],
                        "EconomicModel",
-                       {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), "interaction_memory": 30, "width": gridsize, "height": gridsize})
+                       {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
+                        "interaction_memory": Slider("interaction_memory", 20, 1, 100, 1), 
+                        "sentence_length": Slider("sentence_length", 15, 1, 50, 2), "width": gridsize, "height": gridsize})
 
 # Run the server
 server.port = 8545
