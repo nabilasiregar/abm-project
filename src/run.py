@@ -24,26 +24,29 @@ def agent_portrayal(agent):
         # if has_committed_crime_this_turn is True, color red
         if agent.has_committed_crime_this_turn:
             portrayal = {
-                "Shape": "circle",
+                "Shape": "static/icons/criminal_icon.png",
                 "Color": "red",
                 "Filled": "true",
+                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
         # if has_traded_this_turn is True, color green
         elif agent.has_traded_this_turn:
             portrayal = {
-                "Shape": "circle",
+                "Shape": "static/icons/trade_icon.png",
                 "Color": "green",
                 "Filled": "true",
+                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
         else:
             portrayal = {
-                "Shape": "circle",
+                "Shape": "static/icons/agent.png",
                 "Color": "black",
                 "Filled": "true",
+                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
@@ -53,9 +56,10 @@ def agent_portrayal(agent):
 
         if agent.pos is not None:
             portrayal = {
-                "Shape": "circle",
+                "Shape": "static/icons/police_icon.png",
                 "Color": "blue",
                 "Filled": "true",
+                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
@@ -64,6 +68,7 @@ def agent_portrayal(agent):
                 "Shape": "circle",
                 "Color": "rgba(0, 0, 0, 0.001)",
                 "Filled": "true",
+                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
@@ -86,28 +91,9 @@ class LegendElement(VisualizationElement):
     package_includes = []
     local_includes = []
 
-    def __init__(self):
-        self.js_code = """
-        document.addEventListener("DOMContentLoaded", function() {
-            var legendElement = document.createElement('div');
-            legendElement.innerHTML = `
-            <div id="legend" style="position:fixed; z-index:1000; right:10%; top:10%; background:white; padding:10px; border:1px solid black; border-radius:10px;">
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    <li><span style="background-color: red; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Committed Crime</li>
-                    <li><span style="background-color: green; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Traded</li>
-                    <li><span style="background-color: black; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Economic Agent</li>
-                    <li><span style="background-color: blue; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span> Cop</li>
-                </ul>
-            </div>`;
-            document.body.appendChild(legendElement);
-        });
-        """
-
-legend = LegendElement()
- 
 # Create the server
 server = ModularServer(EconomicModel,
-                       [grid, cop_chart, legend],
+                       [grid, cop_chart],
                        "EconomicModel",
                        {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
                         "interaction_memory": Slider("interaction_memory", 20, 1, 100, 1), 
