@@ -1,5 +1,6 @@
 import mesa
 import numpy as np
+from collections import deque
 
 class EconomicAgent(mesa.Agent):
     'wealth-maximising agent'
@@ -18,9 +19,10 @@ class EconomicAgent(mesa.Agent):
         self.num_punishments_witnessed = 0 # how many crimes have been punished
         self.num_been_crimed = 0 # how many times has this agent been stolen from
 
-        self.q_crime_perception = [] # a queue of crimes witnessed, 1 if punished, 0 if not
-        self.q_interactions = [] # a queue of interactions, 0 if trade, 1 if theft
         self.q_incomes = []
+        self.q_crime_perception = deque([], maxlen=model.interaction_memory) # a queue of crimes witnessed, 1 if punished, 0 if not
+        self.q_interactions = deque([], maxlen=model.interaction_memory) # a queue of interactions, 0 if trade, 1 if theft
+
         self.has_traded_this_turn = False # only keep true for 1 step of the scheduler
         self.has_committed_crime_this_turn = False # only keep true for 1 step of the scheduler, allows cops to arrest
         self.is_arrested = False
@@ -36,6 +38,7 @@ class EconomicAgent(mesa.Agent):
             include_center=False)
         new_position = self.random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
+
     def choose_partner(self):
         # TODO here we can do the logic of choosing a trading partner
         # Possibly also add logic here that calculates the EU of trade/steal for each cellmate and returns best candidate
@@ -49,6 +52,7 @@ class EconomicAgent(mesa.Agent):
             except: other = None 
              # TODO here we can have some wealth prefernces if we want
             return other
+        
     def make_trade(self, other):
             if other is not None: #redundant?
                 trade_value = (other.wealth + self.wealth)* self.model.prosperity
@@ -83,8 +87,8 @@ class EconomicAgent(mesa.Agent):
         self.model.total_stolen += theft_value
         self.model.num_crimes_committed += 1
 
-        self.has_committed_crime_this_turn = True      
-        other.num_been_crimed += 1          
+        self.has_committed_crime_this_turn = True  
+        other.num_been_crimed += 1     
         self.num_interactions +=1
         other.num_interactions +=1
         other.q_interactions.append(1)
@@ -93,7 +97,6 @@ class EconomicAgent(mesa.Agent):
             other.q_interactions.pop(0)
         self.model.num_crimes_committed += 1
         self.model.total_stolen += theft_value
-
 
     def decide_action(self, other):
         '''Decide whether to steal or trade'''
@@ -114,6 +117,7 @@ class EconomicAgent(mesa.Agent):
             return 'trade'
         else:
             return 'steal'
+        
     def vote(self):
         #calculate value of the threat of being robbed using the interactions queue
         # if that value is greater than current tax rate then vote to increase
@@ -128,10 +132,12 @@ class EconomicAgent(mesa.Agent):
             return 1
         else:
             return -1
+        
     def pay_tax(self):
         #wealth tax, could use income tax instead? then the EU calculations are a bit harder
         self.wealth -= self.wealth * self.model.tax_rate
         self.model.total_tax_paid += self.wealth * self.model.tax_rate
+
     def check_for_crimes(self):
         neighbors = self.model.grid.get_neighbors(
             self.pos,
@@ -154,6 +160,7 @@ class EconomicAgent(mesa.Agent):
                 # if len(self.q_crime_perception) > self.model.interaction_memory:
                 #     self.q_crime_perception.pop(0)
                 # # print('crime perception queue', self.q_crime_perception)
+
     def step(self):
         self.has_traded_this_turn = False
         self.has_committed_crime_this_turn = False
@@ -177,7 +184,6 @@ class EconomicAgent(mesa.Agent):
             vote = self.vote() #returns +/- 1
             self.model.votes += vote
 
-
 class CopAgent(mesa.Agent):
     'crime-fighting agent'
     def __init__(self, unique_id, model):
@@ -200,6 +206,7 @@ class CopAgent(mesa.Agent):
         for neighbor in neighbors:
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
                 self.arrest(neighbor)
+
     def arrest(self, criminal_agent):
         criminal_agent.wealth = 1 #TODO
         criminal_agent.is_arrested = True
@@ -221,6 +228,7 @@ class CopAgent(mesa.Agent):
                 # remove the first element of the queue if it's too long
                 if len(neighbor.q_crime_perception) > neighbor.model.interaction_memory:
                     neighbor.q_crime_perception.pop(0)
+
     def step(self):
         self.move()
         self.look_for_crimes()

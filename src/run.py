@@ -1,50 +1,104 @@
-import mesa
+from mesa.visualization.modules import CanvasGrid
+from mesa.visualization.ModularVisualization import ModularServer
+from mesa.visualization.modules import ChartModule
+from mesa.visualization.UserParam import Slider
+from mesa.visualization.ModularVisualization import VisualizationElement
+
 from model import EconomicModel
-import seaborn as sns
-from matplotlib import pyplot as plt
+from agent import EconomicAgent, CopAgent
 
-model = EconomicModel(num_econ_agents=10, initial_cops=0, width=10, height = 10, election_frequency=20, interaction_memory=100)
-for i in range(300):
-    model.step()
+# model = EconomicModel(num_econ_agents=30, initial_cops=0, width=10, height = 10)
+# for i in range(200):
+#     print('step ' + str(i))
+#     # print the amount of agents where has_committed_crime_this_turn is True
+#     print('crimes: ' + str(len([x for x in model.schedule.agents if isinstance(x, EconomicAgent) and x.has_committed_crime_this_turn])))
+#     print('trades: ' + str(len([x for x in model.schedule.agents if isinstance(x, EconomicAgent) and x.has_traded_this_turn])))
+#     print('cops: ' + str(len([x for x in model.schedule.agents if isinstance(x, CopAgent)])))
+#     model.step()
 
-# agent_wealth = model.datacollector.get_agent_vars_dataframe()
-# agent_list = [3, 4, 5, 6, 7]
+gridsize = 10
 
-# # Get the wealth of multiple agents over time
-# multiple_agents_wealth = agent_wealth[
-#     agent_wealth.index.get_level_values("AgentID").isin(agent_list)
-# ]
-# print(multiple_agents_wealth)
-# # Plot the wealth of multiple agents over time
-# g = sns.lineplot(data=multiple_agents_wealth, x="Step", y="wealth", hue="AgentID")
-# g.set(title="Wealth of agents 3, 14 and 25 over time");
+# Define a function to draw the agents
+def agent_portrayal(agent):
+    if isinstance(agent, EconomicAgent):
+        # if has_committed_crime_this_turn is True, color red
+        if agent.has_committed_crime_this_turn:
+            portrayal = {
+                "Shape": "static/icons/criminal_icon.png",
+                "Color": "red",
+                "Filled": "true",
+                "scale": 0.8,
+                "Layer": 0,
+                "r": 0.5
+            }
+        # if has_traded_this_turn is True, color green
+        elif agent.has_traded_this_turn:
+            portrayal = {
+                "Shape": "static/icons/trade_icon.png",
+                "Color": "green",
+                "Filled": "true",
+                "scale": 0.8,
+                "Layer": 0,
+                "r": 0.5
+            }
+        else:
+            portrayal = {
+                "Shape": "static/icons/agent.png",
+                "Color": "black",
+                "Filled": "true",
+                "scale": 0.8,
+                "Layer": 0,
+                "r": 0.5
+            }
 
-# plt.show()
+    elif isinstance(agent, CopAgent):
+        # if the agent is a cop, color blue
 
-# # Step 1: Extract the data from datacollector
-# model_data = model.datacollector.get_model_vars_dataframe()
-# agent_data = model.datacollector.get_agent_vars_dataframe()
+        if agent.pos is not None:
+            portrayal = {
+                "Shape": "static/icons/police_icon.png",
+                "Color": "blue",
+                "Filled": "true",
+                "scale": 0.8,
+                "Layer": 0,
+                "r": 0.5
+            }
+        else:
+            portrayal = {
+                "Shape": "circle",
+                "Color": "rgba(0, 0, 0, 0.001)",
+                "Filled": "true",
+                "scale": 0.8,
+                "Layer": 0,
+                "r": 0.5
+            }
+    return portrayal
 
-# print(agent_data['wealth'])
+# Create a grid visualization
+grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
 
-# # Step 2: Calculate mean agent's wealth and mean num_been_crimed
-# mean_wealth = agent_data['wealth'].mean()
-# mean_num_been_crimed = agent_data['num_been_crimed'].mean()
+# # Create a chart visualization
+# chart = ChartModule([{"Label": "num_arrests_made",
+#                       "Color": "Black"}],
+#                     data_collector_name='datacollector')
 
-# # Step 3: Plotting
-# fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
+# create a chart of the amount of cops
+cop_chart = ChartModule([{"Label": "num_cops",
+                      "Color": "Black"}],
+                    data_collector_name='datacollector')
 
-# # Plot mean agent's wealth
-# ax1.plot(model_data.index, mean_wealth, label='Mean Agent Wealth', color='blue')
-# ax1.set_xlabel('Steps')
-# ax1.set_ylabel('Mean Agent Wealth')
-# ax1.legend()
+class LegendElement(VisualizationElement):
+    package_includes = []
+    local_includes = []
 
-# Plot mean num_been_crimed
-# ax2.plot(model_data.index, model_data['num_been_crimed'], label='Mean Num Been Crimed', color='green')
-# ax2.set_xlabel('Steps')
-# ax2.set_ylabel('Mean Num Been Crimed')
-# ax2.legend()
+# Create the server
+server = ModularServer(EconomicModel,
+                       [grid, cop_chart],
+                       "EconomicModel",
+                       {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
+                        "interaction_memory": Slider("interaction_memory", 20, 1, 100, 1), 
+                        "sentence_length": Slider("sentence_length", 15, 1, 50, 2), "width": gridsize, "height": gridsize})
 
-# plt.tight_layout()
-# plt.show()
+# Run the server
+server.port = 8545
+server.launch()
