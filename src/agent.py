@@ -3,7 +3,7 @@ import numpy as np
 from collections import deque
 
 class EconomicAgent(mesa.Agent):
-    'money-seeking agent'
+    'wealth-maximising agent'
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         
@@ -19,6 +19,7 @@ class EconomicAgent(mesa.Agent):
         self.num_punishments_witnessed = 0 # how many crimes have been punished
         self.num_been_crimed = 0 # how many times has this agent been stolen from
 
+        self.q_incomes = []
         self.q_crime_perception = deque([], maxlen=model.interaction_memory) # a queue of crimes witnessed, 1 if punished, 0 if not
         self.q_interactions = deque([], maxlen=model.interaction_memory) # a queue of interactions, 0 if trade, 1 if theft
 
@@ -54,11 +55,11 @@ class EconomicAgent(mesa.Agent):
         
     def make_trade(self, other):
             if other is not None: #redundant?
-                self.model.total_trade_income += (other.wealth + self.wealth)* self.model.prosperity
+                trade_value = (other.wealth + self.wealth)* self.model.prosperity
                 # TODO add some scaling that will make the poorer person benefit less
                 # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
-                other.wealth += (other.wealth + self.wealth)* self.model.prosperity 
-                self.wealth += (other.wealth + self.wealth)* self.model.prosperity
+                other.wealth += trade_value
+                self.wealth += trade_value
                 # print('own and other wealth after: ' ,self.wealth, other.wealth)
                 
                 self.num_interactions +=1
@@ -66,15 +67,23 @@ class EconomicAgent(mesa.Agent):
                 self.has_traded_this_turn = True
                 other.has_traded_this_turn = True
                 other.q_interactions.append(0)
+
+                self.q_incomes.append(trade_value)
+                if len(self.q_incomes) > self.model.interaction_memory:
+                    self.q_incomes.pop(0)   
                 # remove the first element of the queue if it's too long
                 if len(other.q_interactions) > other.model.interaction_memory:
                     other.q_interactions.pop(0)
-                self.model.total_trade_income += 2*( (other.wealth + self.wealth)* self.model.prosperity)
-
+                self.model.total_trade_income += 2*trade_value
     def steal(self, other):
         theft_value = other.wealth/2
         self.wealth += theft_value
         other.wealth -= theft_value
+
+        self.q_incomes.append(theft_value)
+        if len(self.q_incomes) > self.model.interaction_memory:
+            self.q_incomes.pop(0)   
+
         self.model.total_stolen += theft_value
         self.model.num_crimes_committed += 1
 
@@ -96,9 +105,12 @@ class EconomicAgent(mesa.Agent):
             # use self.q_crime_perception to calculate arrest chance
             arrest_chance = sum(self.q_crime_perception)/len(self.q_crime_perception)
         else: arrest_chance = 0
+
         expected_punishment_pain = self.wealth + self.arrest_aversion * self.model.sentence_length
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
         trade_EU = (other.wealth + self.wealth)* self.model.prosperity
+        print('agents wealth is:' ,self.wealth, ' expected pun pain is ', expected_punishment_pain, 'which results in theft EUof ', theft_EU)
+
         # print('expected trade utility', trade_EU)
         # print('expected theft EU', theft_EU)
         if trade_EU >= theft_EU:
@@ -111,8 +123,8 @@ class EconomicAgent(mesa.Agent):
         # if that value is greater than current tax rate then vote to increase
         if len(self.q_interactions) >0:
             crime_rate = sum(self.q_interactions)/self.model.interaction_memory
-            # print('interaction queue', self.q_interactions)
-            # print('crime rate', crime_rate)
+            print('interaction queue', self.q_interactions)
+            print('crime rate', crime_rate)
         else: crime_rate = 0
         theft_threat = crime_rate* self.wealth * 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
@@ -173,6 +185,7 @@ class EconomicAgent(mesa.Agent):
             self.model.votes += vote
 
 class CopAgent(mesa.Agent):
+    'crime-fighting agent'
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
     def move(self):
