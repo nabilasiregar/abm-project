@@ -34,7 +34,11 @@ class EconomicModel(mesa.Model):
         
         # create agents
         for i in range(self.num_agents):
-            a = EconomicAgent(i, self)
+            trade = np.random.normal(0.8, 0.1)
+            if trade < 0.1: 
+                trade = 0.1
+            a = EconomicAgent(i, self, trade)
+            print(trade)
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
             self.schedule.add(a)
@@ -70,7 +74,7 @@ class EconomicModel(mesa.Model):
             if self.votes > 0:
                 # print('The people have voted to increase taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
                 self.tax_rate += 0.01
-            else:
+            elif self.tax_rate > 0:
                 # print('The people have voted to decrease taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
                 self.tax_rate -= 0.01
         
@@ -84,7 +88,7 @@ class EconomicModel(mesa.Model):
                 y = self.random.randrange(self.grid.height)
                 self.schedule.add(c)
                 self.grid.place_agent(c, (x, y))
-            elif len(cops) > self.num_cops: # ensure there is at least one cop to remove
+            elif len(cops) > self.num_cops and len(cops) > 0: # ensure there is at least one cop to remove
                 cops[0].pos = None
                 cops[0].remove()
                 self.schedule.remove(cops[0])
