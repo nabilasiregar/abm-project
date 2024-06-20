@@ -93,7 +93,12 @@ class EconomicAgent(mesa.Agent):
             # use self.q_crime_perception to calculate arrest chance
             arrest_chance = sum(self.q_crime_perception)/len(self.q_crime_perception)
         else: arrest_chance = 0
-        expected_punishment_pain = self.wealth + self.arrest_aversion * self.model.sentence_length
+
+        alpha = 2 # shape parameter for the pareto distribution
+        sp = 1 # scale parameter for the pareto distribution
+        transformed_sentence_length = sp / (self.model.sentence_length ** (1 / alpha))
+        expected_punishment_pain = self.wealth + self.arrest_aversion * transformed_sentence_length
+
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
         trade_EU = (other.wealth + self.wealth)* self.model.prosperity
         # print('expected trade utility', trade_EU)
