@@ -71,11 +71,6 @@ def agent_portrayal(agent):
 # Create a grid visualization
 grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
 
-# # Create a chart visualization
-# chart = ChartModule([{"Label": "num_arrests_made",
-#                       "Color": "Black"}],
-#                     data_collector_name='datacollector')
-
 # create a chart of the amount of cops
 cop_chart = ChartModule([{"Label": "num_cops",
                       "Color": "Black"}],
