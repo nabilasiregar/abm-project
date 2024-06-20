@@ -27,7 +27,7 @@ class EconomicAgent(mesa.Agent):
 
         self.time_until_released = 0 # countdown of jail sentence
 
-        self.arrest_aversion = 1 # how painful being in jail is to them
+        self.risk_aversion = np.random.normal(1, self.model.risk_aversion_std) #mutable
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
@@ -97,12 +97,10 @@ class EconomicAgent(mesa.Agent):
         alpha = -1.2 # shape parameter for the pareto distribution
         sp = 1 # scale parameter for the pareto distribution
         transformed_sentence_length = sp / (self.model.sentence_length ** (1 / alpha))
-        expected_punishment_pain = self.wealth + self.arrest_aversion * transformed_sentence_length
+        expected_punishment_pain = self.wealth + self.risk_aversion * transformed_sentence_length
 
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
         trade_EU = (other.wealth + self.wealth)* self.model.prosperity
-        # print('expected trade utility', trade_EU)
-        # print('expected theft EU', theft_EU)
         if trade_EU >= theft_EU:
             return 'trade'
         else:
@@ -112,8 +110,6 @@ class EconomicAgent(mesa.Agent):
         # if that value is greater than current tax rate then vote to increase
         if len(self.q_interactions) >0:
             crime_rate = sum(self.q_interactions)/self.model.interaction_memory
-            # print('interaction queue', self.q_interactions)
-            # print('crime rate', crime_rate)
         else: crime_rate = 0
         theft_threat = crime_rate* self.wealth * 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
