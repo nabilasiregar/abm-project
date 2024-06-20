@@ -1,6 +1,6 @@
 import mesa
 from mesa.datacollection import DataCollector
-
+import numpy as np
 from agent import EconomicAgent, CopAgent
 
 class EconomicModel(mesa.Model):
@@ -49,40 +49,43 @@ class EconomicModel(mesa.Model):
 
         # add data collecor
         self.datacollector = mesa.DataCollector(
-            model_reporters = {'Step': 'steps',
-                               'num_cops': 'num_cops',
-                                'num_crimes_committed': 'num_crimes_committed',
-                               'num_arrests_made': 'num_arrests_made',
-                               'tax_rate': 'tax_rate',
-                               'total_stolen' : 'total_stolen',
-                               'total_trade_income' : 'total_trade_income'
-                               },
+            model_reporters = {
+                'Step': 'steps',
+                'num_cops': 'num_cops',
+                'num_crimes_committed': 'num_crimes_committed',
+                'num_arrests_made': 'num_arrests_made',
+                'tax_rate': 'tax_rate',
+                'total_stolen': 'total_stolen',
+                'total_trade_income': 'total_trade_income',
+                'avg_wealth': lambda m: np.mean([agent.wealth for agent in m.schedule.agents if isinstance(agent, EconomicAgent)]),
+                'total_wealth': lambda m: sum(agent.wealth for agent in m.schedule.agents if isinstance(agent, EconomicAgent)),
+                'avg_crime_perception': lambda m: np.mean([sum(agent.q_crime_perception) / len(agent.q_crime_perception) if len(agent.q_crime_perception) > 0 else 0 for agent in m.schedule.agents if isinstance(agent, EconomicAgent)]),
+                'vote_outcome': 'votes'
+            },
             agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed'})
-          
-
 
     def step(self):
         self.steps += 1
         self.schedule.step()
-        if (self.steps-1)%self.election_frequency == 0 and self.steps != 1:
-            if self.votes >0:
+        if (self.steps - 1) % self.election_frequency == 0 and self.steps != 1:
+            if self.votes > 0:
                 # print('The people have voted to increase taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
                 self.tax_rate += 0.01
             else:
                 # print('The people have voted to decrease taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
                 self.tax_rate -= 0.01
         
-            # Adjusting the number of cops to voting results  
-            self.num_cops = self.tax_rate/0.01
+            # Adjusting the number of cops to voting results
+            self.num_cops = int(self.tax_rate / 0.01)
             cops = [x for x in self.agents if isinstance(x, CopAgent)]
 
             if len(cops) < self.num_cops:
                 c = CopAgent(self.next_id(), model = self)
                 x = self.random.randrange(self.grid.width)
                 y = self.random.randrange(self.grid.height)
-                self.schedule.add(c)        
+                self.schedule.add(c)
                 self.grid.place_agent(c, (x, y))
-            else:
+            elif len(cops) > self.num_cops: # ensure there is at least one cop to remove
                 cops[0].pos = None
                 cops[0].remove()
                 self.schedule.remove(cops[0])
