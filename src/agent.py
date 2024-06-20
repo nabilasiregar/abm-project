@@ -136,17 +136,6 @@ class EconomicAgent(mesa.Agent):
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
                 self.q_crime_perception.append(0)
                 self.num_crimes_witnessed += 1
-                # if neighbor.is_arrested:
-                #     self.num_punishments_witnessed += 1
-                #     self.q_crime_perception.append(1)
-                #     print('i saw a crime and they got arrested')
-                # else:
-                #     self.q_crime_perception.append(0)
-
-                # # remove the first element of the queue if it's too long
-                # if len(self.q_crime_perception) > self.model.interaction_memory:
-                #     self.q_crime_perception.pop(0)
-                # # print('crime perception queue', self.q_crime_perception)
     def step(self):
         self.has_traded_this_turn = False
         self.has_committed_crime_this_turn = False
