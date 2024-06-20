@@ -1,5 +1,6 @@
 import mesa
 import numpy as np
+from statistics import mean
 
 class EconomicAgent(mesa.Agent):
     'money-seeking agent'
@@ -97,7 +98,7 @@ class EconomicAgent(mesa.Agent):
         alpha = -1.2 # shape parameter for the pareto distribution
         sp = 1 # scale parameter for the pareto distribution
         transformed_sentence_length = sp / (self.model.sentence_length ** (1 / alpha))
-        expected_punishment_pain = self.wealth + self.risk_aversion * transformed_sentence_length
+        expected_punishment_pain = self.wealth + self.risk_aversion * (transformed_sentence_length * mean(self.q_incomes))
 
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
         trade_EU = (other.wealth + self.wealth)* self.model.prosperity
