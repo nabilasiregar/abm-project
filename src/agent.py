@@ -40,7 +40,6 @@ class EconomicAgent(mesa.Agent):
         self.model.grid.move_agent(self, new_position)
 
     def choose_partner(self):
-        # TODO here we can do the logic of choosing a trading partner
         # Possibly also add logic here that calculates the EU of trade/steal for each cellmate and returns best candidate
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         if len(cellmates) > 1:
@@ -50,17 +49,13 @@ class EconomicAgent(mesa.Agent):
                 other = self.random.choice(cellmates)
 
             except: other = None 
-             # TODO here we can have some wealth prefernces if we want
             return other
         
     def make_trade(self, other):
             if other is not None: #redundant?
                 trade_value = (other.wealth + self.wealth)* self.model.prosperity
-                # TODO add some scaling that will make the poorer person benefit less
-                # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
                 other.wealth += trade_value
                 self.wealth += trade_value
-                # print('own and other wealth after: ' ,self.wealth, other.wealth)
                 
                 self.num_interactions +=1
                 other.num_interactions +=1
@@ -100,7 +95,7 @@ class EconomicAgent(mesa.Agent):
 
     def decide_action(self, other):
         '''Decide whether to steal or trade'''
-        # TODO calculations of expected value to determine action
+        # calculations of expected value to determine action
         if len(self.q_crime_perception) > 0:
             # use self.q_crime_perception to calculate arrest chance
             arrest_chance = sum(self.q_crime_perception)/len(self.q_crime_perception)
@@ -203,7 +198,7 @@ class CopAgent(mesa.Agent):
                 self.arrest(neighbor)
 
     def arrest(self, criminal_agent):
-        criminal_agent.wealth = 1 #TODO
+        criminal_agent.wealth = 1 #reset the wealth of the criminal
         criminal_agent.is_arrested = True
         criminal_agent.time_until_released = self.model.sentence_length 
         #not sure if this is gonna work right, the idea is that once they're arrested and in jail, ppl are no longer observing the crime being committed
