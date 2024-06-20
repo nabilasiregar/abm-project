@@ -3,6 +3,13 @@ from mesa.datacollection import DataCollector
 import numpy as np
 from agent import EconomicAgent, CopAgent
 
+def compute_gini(model):
+    agent_wealths = [agent.wealth for agent in model.schedule.agents if isinstance(agent, EconomicAgent)]
+    x = sorted(agent_wealths)
+    N = model.num_agents
+    B = sum(xi * (N - i) for i, xi in enumerate(x)) / (N * sum(x))
+    return 1 + (1 / N) - 2 * B
+
 class EconomicModel(mesa.Model):
     def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1):
         super().__init__()
