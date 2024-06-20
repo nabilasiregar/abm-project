@@ -4,7 +4,7 @@ import numpy as np
 from agent import EconomicAgent, CopAgent
 
 class EconomicModel(mesa.Model):
-    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5):
+    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1):
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = int(initial_cops)
@@ -20,6 +20,7 @@ class EconomicModel(mesa.Model):
         self.tax_rate = initial_cops*0.01
         self.election_frequency = election_frequency
         self.interaction_memory = interaction_memory
+        self.risk_aversion_std = risk_aversion_std
 
         #vars
         self.votes = 0
