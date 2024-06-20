@@ -42,7 +42,10 @@ class EconomicModel(mesa.Model):
         
         # create agents
         for i in range(self.num_agents):
-            a = EconomicAgent(i, self)
+            trade = np.random.normal(1, 0.1)
+            if trade < 0.1: 
+                trade = 0.1
+            a = EconomicAgent(i, self, trade)
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
             self.schedule.add(a)
