@@ -5,12 +5,13 @@ from collections import deque
 
 class EconomicAgent(mesa.Agent):
     'wealth-maximising agent'
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, trading_skill):
         super().__init__(unique_id, model)
         
         #agent's attributes:
         self.wealth = np.random.uniform(1, 10) #mutable
         self.prosperity = 1 #fixed
+        self.trading_skill = trading_skill
 
         self.criminality = 0 #mutable
 
@@ -58,8 +59,8 @@ class EconomicAgent(mesa.Agent):
                 trade_value = (other.wealth + self.wealth)* self.model.prosperity
                 # TODO add some scaling that will make the poorer person benefit less
                 # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
-                other.wealth += trade_value
-                self.wealth += trade_value
+                other.wealth += trade_value * other.trading_skill
+                self.wealth += trade_value * self.trading_skill
                 # print('own and other wealth after: ' ,self.wealth, other.wealth)
                 
                 self.num_interactions +=1
@@ -112,7 +113,7 @@ class EconomicAgent(mesa.Agent):
         expected_punishment_pain = self.wealth + self.risk_aversion * (transformed_sentence_length * mean(self.q_incomes))
 
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
-        trade_EU = (other.wealth + self.wealth)* self.model.prosperity
+        trade_EU = (other.wealth + self.wealth)* self.model.prosperity * self.trading_skill
 
         # print('agents wealth is:' ,self.wealth, ' expected pun pain is ', expected_punishment_pain, 'which results in theft EUof ', theft_EU)
 
