@@ -73,7 +73,10 @@ class EconomicModel(mesa.Model):
                 'vote_outcome': 'votes',
                 'gini_coeff': compute_gini,
             },
-            agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed'})
+            agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed',
+                               'trading_skill': 'trading_skill', 
+                               
+            })
 
     def step(self):
         self.steps += 1
