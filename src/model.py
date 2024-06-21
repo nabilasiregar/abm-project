@@ -71,10 +71,11 @@ class EconomicModel(mesa.Model):
                 'total_wealth': lambda m: sum(agent.wealth for agent in m.schedule.agents if isinstance(agent, EconomicAgent)),
                 'avg_crime_perception': lambda m: np.mean([sum(agent.q_crime_perception) / len(agent.q_crime_perception) if len(agent.q_crime_perception) > 0 else 0 for agent in m.schedule.agents if isinstance(agent, EconomicAgent)]),
                 'vote_outcome': 'votes',
-                'gini_coeff': compute_gini,
+                'gini_coeff': compute_gini
             },
             agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed',
-                               'trading_skill': 'trading_skill', 
+                               'trading_skill': 'trading_skill', 'risk_aversion': 'risk_aversion',
+                               'num_interactions': 'num_interactions'
                                
             })
 

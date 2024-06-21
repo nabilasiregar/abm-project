@@ -1,4 +1,4 @@
 __pycache__/
 *.py[cod]
 .DS_Store
-results/ofat_results.csv
+results/ofat*
