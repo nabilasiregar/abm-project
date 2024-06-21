@@ -1,16 +1,17 @@
 import mesa
 import numpy as np
+from statistics import mean
 from collections import deque
 
 class EconomicAgent(mesa.Agent):
-    'money-seeking agent'
-    def __init__(self, unique_id, model):
+    'wealth-maximising agent'
+    def __init__(self, unique_id, model, trading_skill):
         super().__init__(unique_id, model)
         
         #agent's attributes:
-        # self.wealth = (np.random.pareto(2) + 1) * 10
         self.wealth = np.random.uniform(1, 10) #mutable
         self.prosperity = 1 #fixed
+        self.trading_skill = trading_skill
 
         self.criminality = 0 #mutable
 
@@ -19,6 +20,7 @@ class EconomicAgent(mesa.Agent):
         self.num_punishments_witnessed = 0 # how many crimes have been punished
         self.num_been_crimed = 0 # how many times has this agent been stolen from
 
+        self.q_incomes = deque([0], maxlen=model.interaction_memory) # a queue of incomes from interactions 
         self.q_crime_perception = deque([], maxlen=model.interaction_memory) # a queue of crimes witnessed, 1 if punished, 0 if not
         self.q_interactions = deque([], maxlen=model.interaction_memory) # a queue of interactions, 0 if trade, 1 if theft
 
@@ -28,7 +30,7 @@ class EconomicAgent(mesa.Agent):
 
         self.time_until_released = 0 # countdown of jail sentence
 
-        self.arrest_aversion = 1 # how painful being in jail is to them
+        self.risk_aversion = np.random.normal(1, self.model.risk_aversion_std) #mutable
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
@@ -54,11 +56,11 @@ class EconomicAgent(mesa.Agent):
         
     def make_trade(self, other):
             if other is not None: #redundant?
-                self.model.total_trade_income += (other.wealth + self.wealth)* self.model.prosperity
+                trade_value = (other.wealth + self.wealth)* self.model.prosperity
                 # TODO add some scaling that will make the poorer person benefit less
                 # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
-                other.wealth += (other.wealth + self.wealth)* self.model.prosperity 
-                self.wealth += (other.wealth + self.wealth)* self.model.prosperity
+                other.wealth += trade_value * other.trading_skill
+                self.wealth += trade_value * self.trading_skill
                 # print('own and other wealth after: ' ,self.wealth, other.wealth)
                 
                 self.num_interactions +=1
@@ -66,15 +68,23 @@ class EconomicAgent(mesa.Agent):
                 self.has_traded_this_turn = True
                 other.has_traded_this_turn = True
                 other.q_interactions.append(0)
+
+                self.q_incomes.append(trade_value)
+                if len(self.q_incomes) > self.model.interaction_memory:
+                    self.q_incomes.pop(0)   
                 # remove the first element of the queue if it's too long
                 if len(other.q_interactions) > other.model.interaction_memory:
                     other.q_interactions.pop(0)
-                self.model.total_trade_income += 2*( (other.wealth + self.wealth)* self.model.prosperity)
-
+                self.model.total_trade_income += 2*trade_value
     def steal(self, other):
         theft_value = other.wealth/2
         self.wealth += theft_value
         other.wealth -= theft_value
+
+        self.q_incomes.append(theft_value)
+        if len(self.q_incomes) > self.model.interaction_memory:
+            self.q_incomes.pop(0)   
+
         self.model.total_stolen += theft_value
         self.model.num_crimes_committed += 1
 
@@ -96,11 +106,20 @@ class EconomicAgent(mesa.Agent):
             # use self.q_crime_perception to calculate arrest chance
             arrest_chance = sum(self.q_crime_perception)/len(self.q_crime_perception)
         else: arrest_chance = 0
-        expected_punishment_pain = self.wealth + self.arrest_aversion * self.model.sentence_length
+
+        alpha = -1.2 # shape parameter for the pareto distribution
+        sp = 1 # scale parameter for the pareto distribution
+        transformed_sentence_length = sp / (self.model.sentence_length ** (1 / alpha))
+        expected_punishment_pain = self.wealth + self.risk_aversion * (transformed_sentence_length * mean(self.q_incomes))
+
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
-        trade_EU = (other.wealth + self.wealth)* self.model.prosperity
+        trade_EU = (other.wealth + self.wealth)* self.model.prosperity * self.trading_skill
+
+        # print('agents wealth is:' ,self.wealth, ' expected pun pain is ', expected_punishment_pain, 'which results in theft EUof ', theft_EU)
+
         # print('expected trade utility', trade_EU)
         # print('expected theft EU', theft_EU)
+
         if trade_EU >= theft_EU:
             return 'trade'
         else:
@@ -114,7 +133,7 @@ class EconomicAgent(mesa.Agent):
             # print('interaction queue', self.q_interactions)
             # print('crime rate', crime_rate)
         else: crime_rate = 0
-        theft_threat = crime_rate* self.wealth * 0.5 #TODO this is hard coded at .5     
+        theft_threat = crime_rate* self.wealth* self.risk_aversion* 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
         if theft_threat > tax_burden:
             return 1
@@ -137,17 +156,6 @@ class EconomicAgent(mesa.Agent):
             if isinstance(neighbor, EconomicAgent) and neighbor.has_committed_crime_this_turn:
                 self.q_crime_perception.append(0)
                 self.num_crimes_witnessed += 1
-                # if neighbor.is_arrested:
-                #     self.num_punishments_witnessed += 1
-                #     self.q_crime_perception.append(1)
-                #     print('i saw a crime and they got arrested')
-                # else:
-                #     self.q_crime_perception.append(0)
-
-                # # remove the first element of the queue if it's too long
-                # if len(self.q_crime_perception) > self.model.interaction_memory:
-                #     self.q_crime_perception.pop(0)
-                # # print('crime perception queue', self.q_crime_perception)
 
     def step(self):
         self.has_traded_this_turn = False
@@ -173,6 +181,7 @@ class EconomicAgent(mesa.Agent):
             self.model.votes += vote
 
 class CopAgent(mesa.Agent):
+    'crime-fighting agent'
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
     def move(self):

@@ -2,7 +2,6 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.UserParam import Slider
-from mesa.visualization.ModularVisualization import VisualizationElement
 
 from model import EconomicModel
 from agent import EconomicAgent, CopAgent
@@ -24,29 +23,26 @@ def agent_portrayal(agent):
         # if has_committed_crime_this_turn is True, color red
         if agent.has_committed_crime_this_turn:
             portrayal = {
-                "Shape": "static/icons/criminal_icon.png",
+                "Shape": "circle",
                 "Color": "red",
                 "Filled": "true",
-                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
         # if has_traded_this_turn is True, color green
         elif agent.has_traded_this_turn:
             portrayal = {
-                "Shape": "static/icons/trade_icon.png",
+                "Shape": "circle",
                 "Color": "green",
                 "Filled": "true",
-                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
         else:
             portrayal = {
-                "Shape": "static/icons/agent.png",
+                "Shape": "circle",
                 "Color": "black",
                 "Filled": "true",
-                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
@@ -56,10 +52,9 @@ def agent_portrayal(agent):
 
         if agent.pos is not None:
             portrayal = {
-                "Shape": "static/icons/police_icon.png",
+                "Shape": "circle",
                 "Color": "blue",
                 "Filled": "true",
-                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
@@ -68,7 +63,6 @@ def agent_portrayal(agent):
                 "Shape": "circle",
                 "Color": "rgba(0, 0, 0, 0.001)",
                 "Filled": "true",
-                "scale": 0.8,
                 "Layer": 0,
                 "r": 0.5
             }
@@ -77,20 +71,11 @@ def agent_portrayal(agent):
 # Create a grid visualization
 grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
 
-# # Create a chart visualization
-# chart = ChartModule([{"Label": "num_arrests_made",
-#                       "Color": "Black"}],
-#                     data_collector_name='datacollector')
-
 # create a chart of the amount of cops
 cop_chart = ChartModule([{"Label": "num_cops",
                       "Color": "Black"}],
                     data_collector_name='datacollector')
-
-class LegendElement(VisualizationElement):
-    package_includes = []
-    local_includes = []
-
+ 
 # Create the server
 server = ModularServer(EconomicModel,
                        [grid, cop_chart],

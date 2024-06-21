@@ -3,8 +3,15 @@ from mesa.datacollection import DataCollector
 import numpy as np
 from agent import EconomicAgent, CopAgent
 
+def compute_gini(model):
+    agent_wealths = [agent.wealth for agent in model.schedule.agents if isinstance(agent, EconomicAgent)]
+    x = sorted(agent_wealths)
+    N = model.num_agents
+    B = sum(xi * (N - i) for i, xi in enumerate(x)) / (N * sum(x))
+    return 1 + (1 / N) - 2 * B
+
 class EconomicModel(mesa.Model):
-    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5):
+    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1):
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = int(initial_cops)
@@ -20,6 +27,7 @@ class EconomicModel(mesa.Model):
         self.tax_rate = initial_cops*0.01
         self.election_frequency = election_frequency
         self.interaction_memory = interaction_memory
+        self.risk_aversion_std = risk_aversion_std
 
         #vars
         self.votes = 0
@@ -34,7 +42,10 @@ class EconomicModel(mesa.Model):
         
         # create agents
         for i in range(self.num_agents):
-            a = EconomicAgent(i, self)
+            trade = np.random.normal(1, 0.1)
+            if trade < 0.1: 
+                trade = 0.1
+            a = EconomicAgent(i, self, trade)
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
             self.schedule.add(a)
