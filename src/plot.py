@@ -26,7 +26,8 @@ def plot_average_all_steps(data, parameter, x_label):
         'gini_coeff': 'Gini Coefficient'
     }
     
-    fig, axs = plt.subplots(3, 1, figsize=(6, 8))
+    fig, axs = plt.subplots(3, 2, figsize=(10, 8))
+    axs = axs.flatten() 
     for ax, (metric, y_label) in zip(axs, metrics.items()):
         # Aggregate data across all steps and iterations
         metric_per_step = data.groupby([parameter, 'iteration', 'Step'])[metric].mean().reset_index()
@@ -42,6 +43,9 @@ def plot_average_all_steps(data, parameter, x_label):
         ax.set_title(f'Average {y_label} Across Steps')
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
+    
+    for extra_ax in axs[len(metrics):]:
+        extra_ax.axis('off')
 
     plt.tight_layout()
     plt.show()
