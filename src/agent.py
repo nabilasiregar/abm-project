@@ -9,7 +9,6 @@ class EconomicAgent(mesa.Agent):
         super().__init__(unique_id, model)
         
         #agent's attributes:
-        # self.wealth = (np.random.pareto(2) + 1) * 10
         self.wealth = np.random.uniform(1, 10) #mutable
         self.prosperity = 1 #fixed
         self.trading_skill = trading_skill
@@ -21,7 +20,7 @@ class EconomicAgent(mesa.Agent):
         self.num_punishments_witnessed = 0 # how many crimes have been punished
         self.num_been_crimed = 0 # how many times has this agent been stolen from
 
-        self.q_incomes = [0]
+        self.q_incomes = deque([0], maxlen=model.interaction_memory) # a queue of incomes from interactions 
         self.q_crime_perception = deque([], maxlen=model.interaction_memory) # a queue of crimes witnessed, 1 if punished, 0 if not
         self.q_interactions = deque([], maxlen=model.interaction_memory) # a queue of interactions, 0 if trade, 1 if theft
 
@@ -133,9 +132,8 @@ class EconomicAgent(mesa.Agent):
             crime_rate = sum(self.q_interactions)/self.model.interaction_memory
             # print('interaction queue', self.q_interactions)
             # print('crime rate', crime_rate)
-
         else: crime_rate = 0
-        theft_threat = crime_rate* self.wealth * 0.5 #TODO this is hard coded at .5     
+        theft_threat = crime_rate* self.wealth* self.risk_aversion* 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
         if theft_threat > tax_burden:
             return 1
