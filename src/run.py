@@ -16,7 +16,7 @@ from agent import EconomicAgent, CopAgent
 #     print('cops: ' + str(len([x for x in model.schedule.agents if isinstance(x, CopAgent)])))
 #     model.step()
 
-gridsize = 10
+gridsize = 20
 
 # Define a function to draw the agents
 def agent_portrayal(agent):
@@ -86,6 +86,9 @@ grid = CanvasGrid(agent_portrayal, gridsize, gridsize, 500, 500)
 cop_chart = ChartModule([{"Label": "num_cops",
                       "Color": "Black"}],
                     data_collector_name='datacollector')
+crimes_chart = ChartModule([{"Label": "num_crimes_committed",
+                      "Color": "Blue"}],
+                    data_collector_name='datacollector')
 
 class LegendElement(VisualizationElement):
     package_includes = []
@@ -93,9 +96,9 @@ class LegendElement(VisualizationElement):
 
 # Create the server
 server = ModularServer(EconomicModel,
-                       [grid, cop_chart],
+                       [grid, crimes_chart, cop_chart],
                        "EconomicModel",
-                       {"num_econ_agents": Slider("num_econ_agents", 30, 2, 100, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
+                       {"num_econ_agents": Slider("num_econ_agents", 30, 2, 200, 1), "initial_cops": Slider("num_cops", 2, 0, 10, 1), 
                         "interaction_memory": Slider("interaction_memory", 20, 1, 100, 1), 
                         "sentence_length": Slider("sentence_length", 15, 1, 50, 2), "width": gridsize, "height": gridsize})
 

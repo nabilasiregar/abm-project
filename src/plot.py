@@ -1,92 +1,65 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def plot_average_all_steps(data, parameter, x_label):
+def plot_ofat(data, param_column):
     """
-    Plots the results of a One Factor at a Time (OFAT) analysis across all steps.
+    Plots statistical summaries (mean and standard deviation) and min-max from individual runs
+    for several model outputs against a specified parameter from a simulation dataset.
 
-    This function aggregates the specified model output over steps and iterations,
-    then plots the mean value of the metric against the specified parameter.
-    It also includes a fill between area representing ±1 standard deviation
-    to show the variability due to stochasticity in the simulations.
+    Args:
+    data (pd.DataFrame): The DataFrame containing the simulation data.
+    param_column (str): The name of the column in `data` that will be used as the parameter
+                        for grouping the data (e.g., 'election_frequency'). This parameter
+                        should reflect a simulation variable you want to analyze.
 
-    Parameters:
-    - data (pd.DataFrame): The DataFrame containing the results.
-    - parameter (str): The model parameter to vary (e.g., 'sentence_length', 'risk_aversion_std').
-    - x_label (str): Label for the x-axis.
-    - title (str): Title of the plot.
+    Plots:
+    Creates a 2x2 grid of subplots where each subplot represents one of the following outputs:
+    - Number of Crimes Committed
+    - Total Wealth
+    - Gini Coefficient
+    - Number of Cops
+
+    Each subplot shows:
+    - Mean values with error bars representing the standard deviation.
+    - Scatter points for the minimum and maximum input values.
+
+    The function adjusts the layout and displays the plot.
     """
-    data = data.reset_index(drop=True)
-    metrics = {
-        'num_crimes_committed': 'Number of Crimes Committed',
-        'num_arrests_made': 'Number of Arrests',
-        'total_stolen': 'Total Stolen',
-        'avg_crime_perception': 'Average Crime Perception',
-        'vote_outcome': 'Voting Outcome',
-        'gini_coeff': 'Gini Coefficient'
-    }
+    # Calculate mean and standard deviation across steps and iterations
+    avg_data_per_step = data.groupby([param_column, 'iteration', 'Step']).mean().reset_index()
+    mean_std_data = avg_data_per_step.groupby([param_column, 'iteration']).mean().groupby(param_column).agg({
+        'num_crimes_committed': ['mean', 'std'],
+        'total_wealth': ['mean', 'std'],
+        'gini_coeff': ['mean', 'std'],
+        'num_cops': ['mean', 'std']
+    })
+
+    # Calculate the min and max across averaged iterations
+    iteration_avg_data = data.groupby([param_column, 'iteration']).mean().reset_index()
+    min_max_data = iteration_avg_data.groupby(param_column).agg({
+        'num_crimes_committed': ['min', 'max'],
+        'total_wealth': ['min', 'max'],
+        'gini_coeff': ['min', 'max'],
+        'num_cops': ['min', 'max']
+    })
     
-    fig, axs = plt.subplots(3, 2, figsize=(10, 8))
-    axs = axs.flatten() 
-    for ax, (metric, y_label) in zip(axs, metrics.items()):
-        # Aggregate data across all steps and iterations
-        metric_per_step = data.groupby([parameter, 'iteration', 'Step'])[metric].mean().reset_index()
-        metric_per_iteration = metric_per_step.groupby([parameter, 'iteration'])[metric].mean().reset_index()
-        metric_summary = metric_per_iteration.groupby(parameter)[metric].agg(['mean', 'std']).reset_index()
+    mean_std_data.columns = ['_'.join(col).rstrip('_') for col in mean_std_data.columns.values]
+    min_max_data.columns = ['_'.join(col).rstrip('_') for col in min_max_data.columns.values]
 
-        # Plotting the average of all steps
-        ax.plot(metric_summary[parameter], metric_summary['mean'], marker='o', linestyle='-', color='#2667FF')
-        ax.fill_between(metric_summary[parameter],
-                        metric_summary['mean'] - metric_summary['std'],
-                        metric_summary['mean'] + metric_summary['std'],
-                        color='#3F8EFC', alpha=0.2)
-        ax.set_title(f'Average {y_label} Across Steps')
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y_label)
-    
-    for extra_ax in axs[len(metrics):]:
-        extra_ax.axis('off')
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+    outputs = ['num_crimes_committed', 'total_wealth', 'gini_coeff', 'num_cops']
+    labels = ['Number of Crimes Committed', 'Population Wealth', 'Gini Coefficient', 'Number of Cops']
 
-    plt.tight_layout()
-    plt.show()
+    for i, output in enumerate(outputs):
+        ax = axs[i // 2, i % 2]
+        ax.errorbar(mean_std_data.index, mean_std_data[output + '_mean'], yerr=mean_std_data[output + '_std'], 
+                    fmt='o', color='green', label='Mean ± SD')
+        ax.scatter(min_max_data.index, min_max_data[output + '_min'], color='pink', marker='x', label='Min')
+        ax.scatter(min_max_data.index, min_max_data[output + '_max'], color='blue', marker='+', label='Max')
 
-def plot_average_last_step(data, parameter, x_label):
-    """
-    Plots the results of a One Factor at a Time (OFAT) analysis at the final state of the system.
-
-    This function aggregates the specified model output over the final step and iterations,
-    then plots the mean value of the metric against the specified parameter.
-    It also includes a fill between area representing ±1 standard deviation
-    to show the variability due to stochasticity in the simulations.
-
-    Parameters:
-    - data (pd.DataFrame): The DataFrame containing the results.
-    - parameter (str): The model parameter to vary (e.g., 'sentence_length', 'risk_aversion_std').
-    - x_label (str): Label for the x-axis.
-    - title (str): Title of the plot.
-    """
-    data = data.reset_index(drop=True)
-    metrics = {
-        'gini_coeff': 'Gini Coefficient',
-        'total_wealth': 'Population Wealth',
-        'num_cops': 'Number of Cops'
-    }
-    
-    fig, axs = plt.subplots(3, 1, figsize=(6, 8))
-    for ax, (metric, y_label) in zip(axs, metrics.items()):
-        # Calculate from the last step of each iteration
-        last_step_data = data.groupby([parameter, 'iteration']).apply(lambda df: df[df['Step'] == df['Step'].max()]).reset_index(drop=True)
-        last_step_metric_summary = last_step_data.groupby(parameter)[metric].agg(['mean', 'std']).reset_index()
-
-        # Plotting the average from the last step of each iteration
-        ax.plot(last_step_metric_summary[parameter], last_step_metric_summary['mean'], marker='o', linestyle='-', color='#2667FF')
-        ax.fill_between(last_step_metric_summary[parameter], 
-                        last_step_metric_summary['mean'] - last_step_metric_summary['std'],
-                        last_step_metric_summary['mean'] + last_step_metric_summary['std'],
-                        color='#3F8EFC', alpha=0.2)
-        ax.set_title(f'Average {y_label} at The Final Step')
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y_label)
+        ax.set_xlabel(param_column.replace('_', ' ').title())
+        ax.set_ylabel(labels[i])
+        ax.legend()
 
     plt.tight_layout()
     plt.show()
