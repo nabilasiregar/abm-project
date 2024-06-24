@@ -11,7 +11,7 @@ def compute_gini(model):
     return 1 + (1 / N) - 2 * B
 
 class EconomicModel(mesa.Model):
-    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1):
+    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1, trading_skill_std = 0.1):
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = int(initial_cops)
@@ -42,7 +42,7 @@ class EconomicModel(mesa.Model):
         
         # create agents
         for i in range(self.num_agents):
-            trade = np.random.normal(1, 0.1)
+            trade = np.random.normal(1, trading_skill_std)
             if trade < 0.1: 
                 trade = 0.1
             a = EconomicAgent(i, self, trade)
@@ -75,7 +75,10 @@ class EconomicModel(mesa.Model):
             },
             agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed',
                                'trading_skill': 'trading_skill', 'risk_aversion': 'risk_aversion',
-                               'num_interactions': 'num_interactions'
+                               'num_interactions': 'num_interactions', 'trading_skill': 'trading_skill',
+                                'total_trading_gain': 'total_trading_gain',
+                                'starting_wealth': 'starting_wealth', 'amount_arrested': 'amount_arrested',
+                                'risk_aversion': 'risk_aversion', 'total_stealing_gain': 'total_stealing_gain'
                                
             })
 

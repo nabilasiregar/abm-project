@@ -9,7 +9,8 @@ class EconomicAgent(mesa.Agent):
         super().__init__(unique_id, model)
         
         #agent's attributes:
-        self.wealth = np.random.uniform(1, 10) #mutable
+        self.starting_wealth = np.random.uniform(1, 10) #mutable
+        self.wealth = self.starting_wealth
         self.prosperity = 1 #fixed
         self.trading_skill = trading_skill
 
@@ -19,6 +20,9 @@ class EconomicAgent(mesa.Agent):
         self.num_crimes_witnessed = 0 # how many crimes has this agent seen happen
         self.num_punishments_witnessed = 0 # how many crimes have been punished
         self.num_been_crimed = 0 # how many times has this agent been stolen from
+        self.total_trading_gain = 0
+        self.total_stealing_gain = 0
+        self.amount_arrested = 0
 
         self.q_incomes = deque([0], maxlen=model.interaction_memory) # a queue of incomes from interactions 
         self.q_crime_perception = deque([], maxlen=model.interaction_memory) # a queue of crimes witnessed, 1 if punished, 0 if not
@@ -61,6 +65,9 @@ class EconomicAgent(mesa.Agent):
                 # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
                 other.wealth += trade_value * other.trading_skill
                 self.wealth += trade_value * self.trading_skill
+
+                self.total_trading_gain += trade_value * self.trading_skill
+                other.total_trading_gain += trade_value * other.trading_skill
                 # print('own and other wealth after: ' ,self.wealth, other.wealth)
                 
                 self.num_interactions +=1
@@ -80,6 +87,7 @@ class EconomicAgent(mesa.Agent):
         theft_value = other.wealth/2
         self.wealth += theft_value
         other.wealth -= theft_value
+        self.total_stealing_gain += theft_value
 
         self.q_incomes.append(theft_value)
         if len(self.q_incomes) > self.model.interaction_memory:
@@ -207,6 +215,7 @@ class CopAgent(mesa.Agent):
         criminal_agent.wealth = 1 #TODO
         criminal_agent.is_arrested = True
         criminal_agent.time_until_released = self.model.sentence_length 
+        criminal_agent.amount_arrested += 1
         #not sure if this is gonna work right, the idea is that once they're arrested and in jail, ppl are no longer observing the crime being committed
         criminal_agent.has_committed_crime_this_turn = False
         self.model.num_arrests_made += 1
