@@ -63,3 +63,43 @@ def plot_ofat(data, param_column):
 
     plt.tight_layout()
     plt.show()
+
+def plot_ofat_final_step(data, param_column, last_step_num):
+    last_step_data = data[data['Step'] == last_step_num]
+
+    # Calculate mean and standard deviation for the last step across iterations
+    mean_std_data = last_step_data.groupby([param_column, 'iteration']).mean().groupby(param_column).agg({
+        'num_crimes_committed': ['mean', 'std'],
+        'total_wealth': ['mean', 'std'],
+        'gini_coeff': ['mean', 'std'],
+        'num_cops': ['mean', 'std']
+    })
+
+    # Calculate the min and max values from these last step averages
+    min_max_data = last_step_data.groupby([param_column, 'iteration']).mean().groupby(param_column).agg({
+        'num_crimes_committed': ['min', 'max'],
+        'total_wealth': ['min', 'max'],
+        'gini_coeff': ['min', 'max'],
+        'num_cops': ['min', 'max']
+    })
+    
+    mean_std_data.columns = ['_'.join(col).rstrip('_') for col in mean_std_data.columns.values]
+    min_max_data.columns = ['_'.join(col).rstrip('_') for col in min_max_data.columns.values]
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+    outputs = ['num_crimes_committed', 'total_wealth', 'gini_coeff', 'num_cops']
+    labels = ['Number of Crimes Committed', 'Population Wealth', 'Gini Coefficient', 'Number of Cops']
+
+    for i, output in enumerate(outputs):
+        ax = axs[i // 2, i % 2]
+        ax.errorbar(mean_std_data.index, mean_std_data[output + '_mean'], yerr=mean_std_data[output + '_std'], 
+                    fmt='o', color='green', label='Mean ± SD')
+        ax.scatter(min_max_data.index, min_max_data[output + '_min'], color='pink', marker='x', label='Min')
+        ax.scatter(min_max_data.index, min_max_data[output + '_max'], color='blue', marker='+', label='Max')
+
+        ax.set_xlabel(param_column.replace('_', ' ').title())
+        ax.set_ylabel(labels[i])
+        ax.legend()
+
+    plt.tight_layout()
+    plt.show()
