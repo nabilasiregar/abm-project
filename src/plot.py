@@ -17,7 +17,7 @@ def plot_ofat(data, param_column):
     - Number of Crimes Committed
     - Total Wealth
     - Gini Coefficient
-    - Number of Police Officers
+    - Number of Cops
 
     Each subplot shows:
     - Mean values with error bars representing the standard deviation.
@@ -48,7 +48,7 @@ def plot_ofat(data, param_column):
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
     outputs = ['num_crimes_committed', 'total_wealth', 'gini_coeff', 'num_cops']
-    labels = ['Number of Crimes Committed', 'Population Wealth', 'Gini Coefficient', 'Number of Police Officers']
+    labels = ['Number of Crimes Committed', 'Population Wealth', 'Gini Coefficient', 'Number of Cops']
 
     for i, output in enumerate(outputs):
         ax = axs[i // 2, i % 2]
