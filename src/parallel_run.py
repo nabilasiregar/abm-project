@@ -8,7 +8,7 @@ from agent import EconomicAgent, CopAgent
 def run_simulation(params, max_steps, iteration):
     print(f"Iteration {iteration + 1} with params: {params}")
     model = EconomicModel(
-        num_econ_agents=int(params["num_econ_agents"]),
+        num_econ_agents=params["num_econ_agents"],
         initial_cops=int(params["initial_cops"]),
         width=int(params["width"]),
         height=int(params["height"]),
@@ -24,8 +24,6 @@ def run_simulation(params, max_steps, iteration):
     # Collect model-level data
     model_results = model.datacollector.get_model_vars_dataframe()
     model_results["iteration"] = iteration + 1
-    model_results["num_econ_agents"] = params["num_econ_agents"]
-    model_results["initial_cop"] = params["initial_cops"]
     model_results["election_frequency"] = params["election_frequency"]
     model_results["sentence_length"] = params["sentence_length"]
     model_results["interaction_memory"] = params["interaction_memory"]
@@ -37,36 +35,32 @@ def run_simulation(params, max_steps, iteration):
     agent_results = model.datacollector.get_agent_vars_dataframe()
     agent_results["iteration"] = iteration + 1
     
-    return model_results, agent_results
+    return model_results
 
 def run():
-    num_samples = 20
+    num_samples = 10
     num_iterations = 30
-    max_steps = 1000
+    max_steps = 500
     
     bounds = {
-        "num_econ_agents": (50, 200),
-        "initial_cops": (0, 20),
         "election_frequency": (10, 100),
-        "sentence_length": (5, 25),
-        "interaction_memory": (2, 22),
-        "risk_aversion_std": (0.1, 0.5)
+        "sentence_length": (5, 90),
+        "interaction_memory": (10, 100),
+        "risk_aversion_std": (0.1, 0.99)
     }
     
     params_list = [
         {
-            "num_econ_agents": econ_agent, 
-            "initial_cops": init_cop, 
-            "width": 10, 
-            "height": 10, 
+            "num_econ_agents": 200, 
+            "initial_cops": 2, 
+            "width": 20, 
+            "height": 20, 
             "election_frequency": elect, 
             "sentence_length": sl,
             "interaction_memory": im,
             "risk_aversion_std": ra
         }
-        for econ_agent in np.linspace(*bounds["num_econ_agents"], num=num_samples, dtype=int)
-        for init_cop in np.linspace(*bounds["initial_cops"], num=num_samples, dtype=int)
-        for elect in np.linspace(*bounds["election_frequenc"], num=num_samples, dtype=int)
+        for elect in np.linspace(*bounds["election_frequency"], num=num_samples, dtype=int)
         for sl in np.linspace(*bounds["sentence_length"], num=num_samples, dtype=int)
         for im in np.linspace(*bounds["interaction_memory"], num=num_samples, dtype=int)
         for ra in np.linspace(*bounds["risk_aversion_std"], num=num_samples)
@@ -89,8 +83,8 @@ def run():
     model_results_df = pd.concat(model_results, ignore_index=True)
     agent_results_df = pd.concat(agent_results, ignore_index=True)
     
-    model_results_df.to_csv('results/ofat_model_results_vary_econ.csv', index=False)
-    agent_results_df.to_csv('results/ofat_agent_results_vary_econ.csv', index=False)
+    model_results_df.to_csv('results/ofat_model_results.csv', index=False)
+    agent_results_df.to_csv('results/ofat_agent_results.csv', index=False)
 
 if __name__ == '__main__':
     run()
