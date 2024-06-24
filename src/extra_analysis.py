@@ -33,13 +33,13 @@ def trading_skill_tests():
     plt.scatter(last_step_data['trading_skill'], last_step_data['total_trading_gain'])
     plt.xlabel('trading skill')
     plt.ylabel('total wealth accumulated trading')
-    plt.show()
+    plt.savefig('src/extra_graphs/trading skill vs total trading income.png')
 
     plt.figure()
     plt.scatter(last_step_data['trading_skill'], last_step_data['wealth'])
     plt.xlabel('trading skill')
     plt.ylabel('final wealth')
-    plt.show()
+    plt.savefig('src/extra_graphs/trading skill vs final wealth.png')
 
     fig, ax1 = plt.subplots()
     scatter1 = ax1.scatter(last_step_data['trading_skill'], last_step_data['total_trading_gain'], color='g', label='total_trading_gain')
@@ -49,13 +49,13 @@ def trading_skill_tests():
     scatter2 = ax2.scatter(last_step_data['trading_skill'], last_step_data['total_stealing_gain'], color='r', label='total_stealing_gain')
     ax2.set_ylabel('total stealing gain')
     ax2.set_ylim(ax1.get_ylim())
-    plt.show()
+    plt.savefig('src/extra_graphs/total stealing gain and trading gain.png')
 
     plt.figure()
     plt.scatter(last_step_data['trading_skill'], last_step_data['crimes_committed_agent'])
     plt.xlabel('trading skill')
     plt.ylabel('amount of crimes committed')
-    plt.show()
+    plt.savefig('src/extra_graphs/trading_skill_vs_crimes_committed')
 
 
 
@@ -85,7 +85,7 @@ def starting_wealth():
         plt.scatter(last_step_data['starting_wealth'], last_step_data['wealth'])
         plt.xlabel('starting_wealth')
         plt.ylabel('final wealth')
-        plt.show()
+        plt.savefig('src/extra_graphs/Starting_wealth_on_final_wealth')
 
 
 def risk_check():
@@ -114,7 +114,10 @@ def risk_check():
     plt.scatter(last_step_data['risk_aversion'], last_step_data['amount_arrested'])
     plt.xlabel('risk_aversion')
     plt.ylabel('amount_arrested')
-    plt.show()
+    plt.savefig('src/extra_graphs/Risk aversion vs amount arrested.png')
+
+def memory_vs_election():
+     pass
 
 
 
