@@ -78,7 +78,8 @@ class EconomicModel(mesa.Model):
                                'num_interactions': 'num_interactions', 'trading_skill': 'trading_skill',
                                 'total_trading_gain': 'total_trading_gain',
                                 'starting_wealth': 'starting_wealth', 'amount_arrested': 'amount_arrested',
-                                'risk_aversion': 'risk_aversion', 'total_stealing_gain': 'total_stealing_gain'
+                                'risk_aversion': 'risk_aversion', 'total_stealing_gain': 'total_stealing_gain',
+                                'crimes_committed_agent': 'crimes_committed_agent'
                                
             })
 

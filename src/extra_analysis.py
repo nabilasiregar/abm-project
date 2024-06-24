@@ -6,6 +6,7 @@ from agent import EconomicAgent, CopAgent
 import matplotlib.pyplot as plt
 
 def trading_skill_tests():
+    #Seeing if trading skill impacts total amount made by trading and if lower trading skill results in more stealing
     model = EconomicModel(
             num_econ_agents=70,
             initial_cops=2,
@@ -41,23 +42,25 @@ def trading_skill_tests():
     plt.show()
 
     fig, ax1 = plt.subplots()
-
-
     scatter1 = ax1.scatter(last_step_data['trading_skill'], last_step_data['total_trading_gain'], color='g', label='total_trading_gain')
     ax1.set_xlabel('trading_skill')
     ax1.set_ylabel('total_trading_gain')
-
-
     ax2 = ax1.twinx()
-
     scatter2 = ax2.scatter(last_step_data['trading_skill'], last_step_data['total_stealing_gain'], color='r', label='total_stealing_gain')
     ax2.set_ylabel('total stealing gain')
-
     ax2.set_ylim(ax1.get_ylim())
-
     plt.show()
 
+    plt.figure()
+    plt.scatter(last_step_data['trading_skill'], last_step_data['crimes_committed_agent'])
+    plt.xlabel('trading skill')
+    plt.ylabel('amount of crimes committed')
+    plt.show()
+
+
+
 def starting_wealth():
+        #Seeing if starting wealth impacts the final wealth at all
         model = EconomicModel(
             num_econ_agents=70,
             initial_cops=2,
@@ -86,7 +89,7 @@ def starting_wealth():
 
 
 def risk_check():
-     
+    #Increasing risk aversion sd to see impact on amount of times arrested
     model = EconomicModel(
         num_econ_agents=70,
         initial_cops=2,
@@ -112,6 +115,9 @@ def risk_check():
     plt.xlabel('risk_aversion')
     plt.ylabel('amount_arrested')
     plt.show()
+
+
+
 
 trading_skill_tests()
 starting_wealth()

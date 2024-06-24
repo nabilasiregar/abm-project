@@ -22,6 +22,7 @@ class EconomicAgent(mesa.Agent):
         self.num_been_crimed = 0 # how many times has this agent been stolen from
         self.total_trading_gain = 0
         self.total_stealing_gain = 0
+        self.crimes_committed_agent = 0
         self.amount_arrested = 0
 
         self.q_incomes = deque([0], maxlen=model.interaction_memory) # a queue of incomes from interactions 
@@ -88,6 +89,7 @@ class EconomicAgent(mesa.Agent):
         self.wealth += theft_value
         other.wealth -= theft_value
         self.total_stealing_gain += theft_value
+        self.crimes_committed_agent += 1
 
         self.q_incomes.append(theft_value)
         if len(self.q_incomes) > self.model.interaction_memory:
