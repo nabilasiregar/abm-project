@@ -36,8 +36,8 @@ def run_simulation(params, max_steps, iteration):
 
 def run():
     max_steps = 500
-    num_samples = 16
-    num_iterations = 20
+    num_samples = 34
+    num_iterations = 100
     
     problem = {
         'num_vars': 3,
@@ -49,10 +49,10 @@ def run():
     
     params_list = [
         {
-            "num_econ_agents": 150,
+            "num_econ_agents": 200,
             "initial_cops": 2,
-            "width": 10,
-            "height": 10,
+            "width": 20,
+            "height": 20,
             "election_frequency": 70,
             "sentence_length": param_values[i, 0],
             "interaction_memory": param_values[i, 1],
@@ -70,10 +70,12 @@ def run():
     
     model_results = []
     
-    for model_df in results:
+    for model_df, agents_df in results:
         model_results.append(model_df)
-    
+
     model_results_df = pd.concat(model_results, ignore_index=True)
+
+
 
     # Task 1: Last step
     # Take the last step from each iteration and group them by unique parameter sets
@@ -81,15 +83,15 @@ def run():
     last_step_avg_df = last_step_df.groupby(['num_econ_agents', 'initial_cops', 'election_frequency', 
                                               'sentence_length', 'interaction_memory', 'risk_aversion_std']).mean().reset_index()
 
-    last_step_avg_df.to_csv('results/global_sensitivity_analysis_model_results_last_step.csv', index=False)
+    last_step_avg_df.to_csv('results/global_sensitivity_analysis_model_results_last_step_1.1.csv', index=False)
 
-    # Task 2: Across steps
-    # Take all steps from each iteration and group them by unique parameter sets and Step
-    across_steps_df = model_results_df.groupby(['Step', 'num_econ_agents', 'initial_cops', 'election_frequency', 
-                                                'sentence_length', 'interaction_memory', 'risk_aversion_std']).mean().reset_index()
-    across_steps_df.to_csv('results/global_sensitivity_analysis_model_results_all_steps.csv', index=False)
+    # # Task 2: Across steps
+    # # Take all steps from each iteration and group them by unique parameter sets and Step
+    # across_steps_df = model_results_df.groupby(['Step', 'num_econ_agents', 'initial_cops', 'election_frequency', 
+    #                                             'sentence_length', 'interaction_memory', 'risk_aversion_std']).mean().reset_index()
+    # across_steps_df.to_csv('results/global_sensitivity_analysis_model_results_all_steps_1.csv', index=False)
 
-    return across_steps_df, last_step_avg_df
+    return last_step_avg_df
 
 if __name__ == '__main__':
     run()
