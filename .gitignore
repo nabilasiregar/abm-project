@@ -1,5 +1,5 @@
 __pycache__/
 *.py[cod]
 .DS_Store
-results/ofat*
+results
 static/plot
