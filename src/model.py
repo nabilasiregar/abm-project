@@ -74,14 +74,9 @@ class EconomicModel(mesa.Model):
                 'vote_outcome': 'votes',
                 'gini_coeff': compute_gini
             },
-            agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed',
-                               'trading_skill': 'trading_skill', 'risk_aversion': 'risk_aversion',
-                               'num_interactions': 'num_interactions', 'trading_skill': 'trading_skill',
-                                'total_trading_gain': 'total_trading_gain',
-                                'starting_wealth': 'starting_wealth', 'amount_arrested': 'amount_arrested',
-                                'risk_aversion': 'risk_aversion', 'total_stealing_gain': 'total_stealing_gain',
-                                'crimes_committed_agent': 'crimes_committed_agent'
-                               
+            agent_reporters = {'wealth': 'wealth', 'num_been_crimed': 'num_been_crimed', 'trading_skill': 'trading_skill', 'risk_aversion': 'risk_aversion',
+                               'num_interactions': 'num_interactions', 'total_trading_gain': 'total_trading_gain', 'starting_wealth': 'starting_wealth', 'amount_arrested': 'amount_arrested',
+                                'total_stealing_gain': 'total_stealing_gain', 'crimes_committed_agent': 'crimes_committed_agent'
             })
 
     def step(self):
