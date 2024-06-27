@@ -11,7 +11,7 @@ def compute_gini(model):
     return 1 + (1 / N) - 2 * B
 
 class EconomicModel(mesa.Model):
-    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1, trading_skill_std = 0.1):
+    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1, trading_skill_std = 0.1, tax_per_cop = 0.01):
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = int(initial_cops)
@@ -24,10 +24,11 @@ class EconomicModel(mesa.Model):
         #parameters
         self.sentence_length = sentence_length
         self.prosperity = 0.05 #global prosperity if we want to model a dynamic economy, use as a multiplier for trade
-        self.tax_rate = initial_cops*0.01
+        self.tax_rate = initial_cops*tax_per_cop
         self.election_frequency = election_frequency
         self.interaction_memory = interaction_memory
         self.risk_aversion_std = risk_aversion_std
+        self.tax_per_cop = tax_per_cop
 
         #vars
         self.votes = 0
@@ -89,13 +90,13 @@ class EconomicModel(mesa.Model):
         if (self.steps - 1) % self.election_frequency == 0 and self.steps != 1:
             if self.votes > 0:
                 # print('The people have voted to increase taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
-                self.tax_rate += 0.01
+                self.tax_rate += self.tax_per_cop
             elif self.tax_rate > 0:
                 # print('The people have voted to decrease taxes because votes were', self.votes, 'and the tax rate is', self.tax_rate, 'and the number of cops is', self.num_cops, 'and the number of agents is', self.num_agents)
-                self.tax_rate -= 0.01
+                self.tax_rate -= self.tax_per_cop
         
             # Adjusting the number of cops to voting results
-            self.num_cops = int(self.tax_rate / 0.01)
+            self.num_cops = int(self.tax_rate / self.tax_per_cop)
             cops = [x for x in self.agents if isinstance(x, CopAgent)]
 
             if len(cops) < self.num_cops:

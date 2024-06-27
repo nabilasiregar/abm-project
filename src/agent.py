@@ -35,7 +35,10 @@ class EconomicAgent(mesa.Agent):
 
         self.time_until_released = 0 # countdown of jail sentence
 
-        self.risk_aversion = np.random.normal(1, self.model.risk_aversion_std) #mutable
+        risk_av = np.random.normal(1, self.model.risk_aversion_std)
+        if risk_av <= 0:
+            risk_av = 0.1
+        self.risk_aversion = risk_av
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
