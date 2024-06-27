@@ -87,6 +87,7 @@ class EconomicAgent(mesa.Agent):
                 if len(other.q_interactions) > other.model.interaction_memory:
                     other.q_interactions.pop(0)
                 self.model.total_trade_income += 2*trade_value
+                
     def steal(self, other):
         theft_value = other.wealth/2
         self.wealth += theft_value
