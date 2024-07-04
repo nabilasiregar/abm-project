@@ -4,40 +4,52 @@ import numpy as np
 from itertools import combinations
 from SALib.analyze import sobol
 
-def plot_index(s, params, i, title=''):
+def plot_index(ax, s, params, index, title, title_fontsize, label_fontsize, tick_fontsize):
     """
     Creates a plot for Sobol sensitivity analysis that shows the contributions
     of each parameter to the global sensitivity.
 
     Args:
-        s (dict): dictionary {'S#': dict, 'S#_conf': dict} of dicts that hold
+        ax (Axes): Matplotlib Axes object to plot on
+        s (dict): dictionary {'S1': array, 'S1_conf': array, 'ST': array, 'ST_conf': array} of dicts that hold
             the values for a set of parameters
         params (list): the parameters taken from s
-        i (str): string that indicates what order the sensitivity is.
+        index (str): string that indicates what order the sensitivity is ('S1' or 'ST').
         title (str): title for the plot
+        title_fontsize (int): font size for the title
+        label_fontsize (int): font size for the labels
+        tick_fontsize (int): font size for the tick labels
     """
-    plt.figure(figsize=(10, 6))
+    indices = s[index] 
+    errors = s[index + '_conf']  
     
-    if i == '2':
-        p = len(params)
-        params = list(combinations(params, 2))
-        indices = s['S' + i].reshape((p ** 2))
-        indices = indices[~np.isnan(indices)]
-        errors = s['S' + i + '_conf'].reshape((p ** 2))
-        errors = errors[~np.isnan(errors)]
-    else:
-        indices = s['S' + i]
-        errors = s['S' + i + '_conf']
+    ax.set_title(title, fontsize=title_fontsize)
+    ax.set_ylim([-0.2, len(indices) - 1 + 0.2])
+    ax.set_yticks(range(len(indices)))
+    ax.set_yticklabels(params, fontsize=label_fontsize) 
+    ax.errorbar(indices, range(len(indices)), xerr=errors, linestyle='None', marker='o')  
+    ax.axvline(0, c='k')
+    ax.set_xlabel('Sensitivity Index', fontsize=label_fontsize)
+    ax.set_ylabel('Parameters', fontsize=label_fontsize)  
+    ax.tick_params(axis='both', which='major', labelsize=tick_fontsize)
+    ax.tick_params(axis='both', which='minor', labelsize=tick_fontsize)
+
+def plot_first_and_total_order(s, params, title, title_fontsize, label_fontsize, tick_fontsize):
+    """
+    Plots the first order and total order sensitivity indices side by side.
+
+    Args:
+        s (dict): dictionary {'S1': array, 'S1_conf': array, 'ST': array, 'ST_conf': array} of sensitivity indices
+        params (list): list of parameter names
+        title (str): title for the plots
+        title_fontsize (int): font size for the title
+        label_fontsize (int): font size for the labels
+        tick_fontsize (int): font size for the tick labels
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(20, 10))  
     
-    l = len(indices)
-
-    plt.title(title)
-    plt.ylim([-0.2, len(indices) - 1 + 0.2])
-    plt.yticks(range(l), [f"{p[0]} & {p[1]}" if i == '2' else p for p in params])
-    plt.errorbar(indices, range(l), xerr=errors, linestyle='None', marker='o')
-    plt.axvline(0, c='k')
-    plt.xlabel('Sensitivity Index')
-    plt.tight_layout()
-
-
-
+    plot_index(axes[0], s, params, 'S1', title + ' - First Order', title_fontsize, label_fontsize, tick_fontsize)
+    plot_index(axes[1], s, params, 'ST', title + ' - Total Order', title_fontsize, label_fontsize, tick_fontsize)
+    
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95]) 
+    plt.show()

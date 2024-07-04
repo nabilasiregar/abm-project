@@ -5,6 +5,7 @@ from SALib.sample import saltelli
 from SALib.analyze import sobol
 from model import EconomicModel, compute_gini
 from agent import EconomicAgent, CopAgent
+import pickle
 
 def run_simulation(params, max_steps, iteration):
     print(f"Iteration {iteration + 1} with params: {params}")
@@ -16,9 +17,12 @@ def run_simulation(params, max_steps, iteration):
         election_frequency=params["election_frequency"],
         sentence_length=int(params["sentence_length"]),
         interaction_memory=int(params["interaction_memory"]),
-        risk_aversion_std=params["risk_aversion_std"]
+        risk_aversion_std=params["risk_aversion_std"],
+        trading_skill_std=params["trading_skill_std"],
+        tax_per_cop=params["tax_per_cop"]
     )
-    
+
+
     for _ in range(max_steps):
         model.step()
     
@@ -31,22 +35,24 @@ def run_simulation(params, max_steps, iteration):
     model_results["sentence_length"] = params["sentence_length"]
     model_results["interaction_memory"] = params["interaction_memory"]
     model_results["risk_aversion_std"] = params["risk_aversion_std"]
+    model_results["tax_per_cop"] = params["tax_per_cop"]
+    model_results["trading_skill_std"] = params["trading_skill_std"]
     
     return model_results
 
 def run():
     max_steps = 500
-    num_samples = 34
-    num_iterations = 100
+    num_samples = 64
+    num_iterations = 50
     
     problem = {
-        'num_vars': 3,
-        'names': ['sentence_length', 'interaction_memory', 'risk_aversion_std'],
-        'bounds': [[5, 25], [10, 100], [0.1, 0.99]]
+        'num_vars': 5,
+        'names': ['sentence_length', 'interaction_memory', 'risk_aversion_std', 'trading_skill_std', 'tax_per_cop'],
+        'bounds': [[5, 90], [10, 100], [0.1, 0.90], [0.1, 0.90], [0.01, 0.1]]
     }
     
-    param_values = saltelli.sample(problem, num_samples)
-    
+    param_values = saltelli.sample(problem, num_samples, calc_second_order=True)
+
     params_list = [
         {
             "num_econ_agents": 200,
@@ -56,42 +62,27 @@ def run():
             "election_frequency": 70,
             "sentence_length": param_values[i, 0],
             "interaction_memory": param_values[i, 1],
-            "risk_aversion_std": param_values[i, 2]
+            "risk_aversion_std": param_values[i, 2],
+            "tax_per_cop": param_values[i, 3],
+            "trading_skill_std": param_values[i, 4]
         }
         for i in range(len(param_values))
     ]
     
     param_iteration_list = [(params, iteration) for iteration in range(num_iterations) for params in params_list]
-    
+
     results = Parallel(n_jobs=-1)(
         delayed(run_simulation)(params, max_steps, iteration)
-        for params, iteration in param_iteration_list
+        for params, iteration in param_iteration_list 
     )
     
     model_results = []
-    
-    for model_df, agents_df in results:
+    for model_df in results:
         model_results.append(model_df)
 
     model_results_df = pd.concat(model_results, ignore_index=True)
 
-
-
-    # Task 1: Last step
-    # Take the last step from each iteration and group them by unique parameter sets
-    last_step_df = model_results_df[model_results_df['Step'] == max_steps - 1]
-    last_step_avg_df = last_step_df.groupby(['num_econ_agents', 'initial_cops', 'election_frequency', 
-                                              'sentence_length', 'interaction_memory', 'risk_aversion_std']).mean().reset_index()
-
-    last_step_avg_df.to_csv('results/global_sensitivity_analysis_model_results_last_step_1.1.csv', index=False)
-
-    # # Task 2: Across steps
-    # # Take all steps from each iteration and group them by unique parameter sets and Step
-    # across_steps_df = model_results_df.groupby(['Step', 'num_econ_agents', 'initial_cops', 'election_frequency', 
-    #                                             'sentence_length', 'interaction_memory', 'risk_aversion_std']).mean().reset_index()
-    # across_steps_df.to_csv('results/global_sensitivity_analysis_model_results_all_steps_1.csv', index=False)
-
-    return last_step_avg_df
+    model_results_df.to_csv('results/global_SA_last_step_50i.csv', index=False)
 
 if __name__ == '__main__':
     run()
