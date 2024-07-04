@@ -5,16 +5,16 @@ from agent import EconomicAgent, CopAgent
 
 def compute_gini(model):
     """
-        Calculate the Gini coefficient for a given model.
+    Calculate the Gini coefficient for a given model.
 
-        The Gini coefficient is a measure of inequality in a distribution,
-        represented here by wealth among economic agents within the model.
+    The Gini coefficient is a measure of inequality in a distribution,
+    represented here by wealth among economic agents within the model.
 
-        Parameters:
-        - model (mesa.Model): The simulation model containing the agents.
+    Parameters:
+    - model (mesa.Model): The simulation model containing the agents.
 
-        Returns:
-        - float: The Gini coefficient, where 0 represents perfect equality and 1 represents maximum inequality.
+    Returns:
+    - float: The Gini coefficient, where 0 represents perfect equality and 1 represents maximum inequality.
     """
     agent_wealths = [agent.wealth for agent in model.schedule.agents if isinstance(agent, EconomicAgent)]
     x = sorted(agent_wealths)
