@@ -44,7 +44,7 @@ def run_simulation(params, max_steps, iteration):
 
 def run():
     num_samples = 10
-    num_iterations = 40
+    num_iterations = 200
     max_steps = 500
     
     bounds = {
@@ -59,11 +59,11 @@ def run():
     params_list = [
         {
             "num_econ_agents": 200, 
-            "initial_cops": 2, 
+            "initial_cops": 40, 
             "width": 20, 
             "height": 20, 
             "election_frequency": 70, 
-            "sentence_length": 20,
+            "sentence_length": 50,
             "interaction_memory": 50,
             "risk_aversion_std": 0.3,
             "trading_skill_std": 0.3,
@@ -94,7 +94,7 @@ def run():
     model_results_df = pd.concat(model_results, ignore_index=True)
     agent_results_df = pd.concat(agent_results, ignore_index=True)
     
-    model_results_df.to_csv('results/default_model_results.csv', index=False)
+    model_results_df.to_csv('results/default_model_result_40cops.csv', index=False)
     agent_results_df.to_csv('results/default_agent_results.csv', index=False)
 
 if __name__ == '__main__':

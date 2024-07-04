@@ -11,7 +11,7 @@ def compute_gini(model):
     return 1 + (1 / N) - 2 * B
 
 class EconomicModel(mesa.Model):
-    def __init__(self, num_econ_agents, initial_cops=0, width=10, height=10, election_frequency = 20, sentence_length = 15, interaction_memory = 5, risk_aversion_std = 0.1, trading_skill_std = 0.1, tax_per_cop = 0.01):
+    def __init__(self, num_econ_agents, initial_cops=0, width=20, height=20, election_frequency = 70, sentence_length = 20, interaction_memory = 50, risk_aversion_std = 0.3, trading_skill_std = 0.3, tax_per_cop = 0.01):
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = int(initial_cops)

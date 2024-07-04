@@ -29,7 +29,7 @@ def plot_ofat(data, param_column):
     avg_data_per_step = data.groupby([param_column, 'iteration', 'Step']).mean().reset_index()
     mean_std_data = avg_data_per_step.groupby([param_column, 'iteration']).mean().groupby(param_column).agg({
         'num_crimes_committed': ['mean', 'std'],
-        'total_wealth': ['mean', 'std'],
+        'num_arrests_made': ['mean', 'std'],
         'gini_coeff': ['mean', 'std'],
         'num_cops': ['mean', 'std']
     })
@@ -37,8 +37,8 @@ def plot_ofat(data, param_column):
     mean_std_data.columns = ['_'.join(col).rstrip('_') for col in mean_std_data.columns.values]
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    outputs = ['num_crimes_committed', 'total_wealth', 'gini_coeff', 'num_cops']
-    labels = ['Number of Crimes Committed', 'Population Wealth', 'Gini Coefficient', 'Number of Cops']
+    outputs = ['num_crimes_committed', 'num_arrests_made', 'gini_coeff', 'num_cops']
+    labels = ['Number of Crimes Committed', 'Number of Arrests', 'Gini Coefficient', 'Number of Cops']
 
     for i, output in enumerate(outputs):
         ax = axs[i // 2, i % 2]
@@ -56,16 +56,16 @@ def plot_ofat_final_step(data, param_column, last_step_num):
     # Calculate mean and standard deviation for the last step across iterations
     mean_std_data = last_step_data.groupby([param_column, 'iteration']).mean().groupby(param_column).agg({
         'num_crimes_committed': ['mean', 'std'],
-        'total_wealth': ['mean', 'std'],
         'gini_coeff': ['mean', 'std'],
+        'avg_crime_perception': ['mean', 'std'],
         'num_cops': ['mean', 'std']
     })
 
     mean_std_data.columns = ['_'.join(col).rstrip('_') for col in mean_std_data.columns.values]
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    outputs = ['num_crimes_committed', 'total_wealth', 'gini_coeff', 'num_cops']
-    labels = ['Number of Crimes Committed', 'Population Wealth', 'Gini Coefficient', 'Number of Cops']
+    outputs = ['num_crimes_committed', 'gini_coeff', 'avg_crime_perception', 'num_cops']
+    labels = ['Number of Crimes Committed', 'Gini Coeff', 'Average Crime Perception', 'Number of Cops']
 
     for i, output in enumerate(outputs):
         ax = axs[i // 2, i % 2]
