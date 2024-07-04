@@ -41,6 +41,7 @@ class EconomicAgent(mesa.Agent):
         self.risk_aversion = risk_av
 
     def move(self):
+        """Move the agent to a random neighboring cell."""
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
             moore=True,
@@ -49,46 +50,44 @@ class EconomicAgent(mesa.Agent):
         self.model.grid.move_agent(self, new_position)
 
     def choose_partner(self):
-        # TODO here we can do the logic of choosing a trading partner
-        # Possibly also add logic here that calculates the EU of trade/steal for each cellmate and returns best candidate
+        """Choose a trading partner from neighboring agents."""
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         if len(cellmates) > 1:
             cellmates = [x for x in cellmates if isinstance(x, EconomicAgent)]
             cellmates = [x for x in cellmates if not x.is_arrested and not x is self]
             try:
                 other = self.random.choice(cellmates)
-
             except: other = None 
-             # TODO here we can have some wealth prefernces if we want
+             # here we can have some wealth prefernces if we want
             return other
         
     def make_trade(self, other):
-            if other is not None: #redundant?
-                trade_value = (other.wealth + self.wealth)* self.model.prosperity
-                # TODO add some scaling that will make the poorer person benefit less
-                # print('own and other wealth before trade: ' ,self.wealth, other.wealth)
-                other.wealth += trade_value * other.trading_skill
-                self.wealth += trade_value * self.trading_skill
+        """Perform a trade with another agent."""
+        if other is not None: 
+            trade_value = (other.wealth + self.wealth)* self.model.prosperity
+            # TODO add some scaling that will make the poorer person benefit less
+            other.wealth += trade_value * other.trading_skill
+            self.wealth += trade_value * self.trading_skill
 
-                self.total_trading_gain += trade_value * self.trading_skill
-                other.total_trading_gain += trade_value * other.trading_skill
-                # print('own and other wealth after: ' ,self.wealth, other.wealth)
-                
-                self.num_interactions +=1
-                other.num_interactions +=1
-                self.has_traded_this_turn = True
-                other.has_traded_this_turn = True
-                other.q_interactions.append(0)
+            self.total_trading_gain += trade_value * self.trading_skill
+            other.total_trading_gain += trade_value * other.trading_skill
+            
+            self.num_interactions +=1
+            other.num_interactions +=1
+            self.has_traded_this_turn = True
+            other.has_traded_this_turn = True
+            other.q_interactions.append(0)
 
-                self.q_incomes.append(trade_value)
-                if len(self.q_incomes) > self.model.interaction_memory:
-                    self.q_incomes.pop(0)   
-                # remove the first element of the queue if it's too long
-                if len(other.q_interactions) > other.model.interaction_memory:
-                    other.q_interactions.pop(0)
-                self.model.total_trade_income += 2*trade_value
+            self.q_incomes.append(trade_value)
+            if len(self.q_incomes) > self.model.interaction_memory:
+                self.q_incomes.pop(0)   
+            # remove the first element of the queue if it's too long
+            if len(other.q_interactions) > other.model.interaction_memory:
+                other.q_interactions.pop(0)
+            self.model.total_trade_income += 2*trade_value
                 
     def steal(self, other):
+        """Steal wealth from another agent."""
         theft_value = other.wealth/2
         self.wealth += theft_value
         other.wealth -= theft_value
@@ -114,7 +113,7 @@ class EconomicAgent(mesa.Agent):
         self.model.total_stolen += theft_value
 
     def decide_action(self, other):
-        '''Decide whether to steal or trade'''
+        """Decide whether to steal or trade based on expected utility."""
         # TODO calculations of expected value to determine action
         if len(self.q_crime_perception) > 0:
             # use self.q_crime_perception to calculate arrest chance
@@ -129,25 +128,17 @@ class EconomicAgent(mesa.Agent):
         theft_EU = other.wealth/2 - expected_punishment_pain*arrest_chance
         trade_EU = (other.wealth + self.wealth)* self.model.prosperity * self.trading_skill
 
-        # print('agents wealth is:' ,self.wealth, ' expected pun pain is ', expected_punishment_pain, 'which results in theft EUof ', theft_EU)
-
-        # print('expected trade utility', trade_EU)
-        # print('expected theft EU', theft_EU)
-
         if trade_EU >= theft_EU:
             return 'trade'
         else:
             return 'steal'
         
     def vote(self):
-        #calculate value of the threat of being robbed using the interactions queue
-        # if that value is greater than current tax rate then vote to increase
+        """Vote to increase or decrease the tax rate based on crime threat and tax burden."""
         if len(self.q_interactions) >0:
             crime_rate = sum(self.q_interactions)/self.model.interaction_memory
-            # print('interaction queue', self.q_interactions)
-            # print('crime rate', crime_rate)
         else: crime_rate = 0
-        theft_threat = crime_rate* self.wealth* self.risk_aversion* 0.5 #TODO this is hard coded at .5     
+        theft_threat = crime_rate* self.wealth* self.risk_aversion * 0.5 #TODO this is hard coded at .5     
         tax_burden = self.wealth*self.model.tax_rate
         if theft_threat > tax_burden:
             return 1
@@ -160,6 +151,7 @@ class EconomicAgent(mesa.Agent):
         self.model.total_tax_paid += self.wealth * self.model.tax_rate
 
     def check_for_crimes(self):
+        """Check for crimes in the neighborhood."""
         neighbors = self.model.grid.get_neighbors(
             self.pos,
             moore=True,
@@ -172,6 +164,7 @@ class EconomicAgent(mesa.Agent):
                 self.num_crimes_witnessed += 1
 
     def step(self):
+        """Perform a single step of the agent's behavior."""
         self.has_traded_this_turn = False
         self.has_committed_crime_this_turn = False
         #if they're in jail they don't do anything
@@ -188,7 +181,7 @@ class EconomicAgent(mesa.Agent):
                 else: 
                     self.make_trade(other)
             self.check_for_crimes()
-        self.pay_tax() # or maybe you should only pay tax when you make a trade? idk
+        self.pay_tax() # or maybe you should only pay tax when you make a trade?
         
         if (self.model.steps)%self.model.election_frequency == 0:
             vote = self.vote() #returns +/- 1
@@ -198,7 +191,9 @@ class CopAgent(mesa.Agent):
     'crime-fighting agent'
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+
     def move(self):
+        """Move the cop agent to a random neighboring cell."""
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
             moore=True,
@@ -207,6 +202,7 @@ class CopAgent(mesa.Agent):
         self.model.grid.move_agent(self, new_position)
         
     def look_for_crimes(self):
+        """Look for crimes in the neighborhood and arrest criminals."""
         neighbors = self.model.grid.get_neighbors(
             self.pos,
             moore=True,
@@ -218,11 +214,12 @@ class CopAgent(mesa.Agent):
                 self.arrest(neighbor)
 
     def arrest(self, criminal_agent):
+        """Arrest a criminal agent and update relevant attributes."""
         criminal_agent.wealth = 1 #TODO
         criminal_agent.is_arrested = True
-        criminal_agent.time_until_released = self.model.sentence_length 
+        criminal_agent.time_until_released = self.model.sentence_length
         criminal_agent.amount_arrested += 1
-        #not sure if this is gonna work right, the idea is that once they're arrested and in jail, ppl are no longer observing the crime being committed
+        # the idea is that once they're arrested and in jail, people are no longer observing the crime being committed
         criminal_agent.has_committed_crime_this_turn = False
         self.model.num_arrests_made += 1
 
