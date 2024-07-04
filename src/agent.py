@@ -6,6 +6,39 @@ from collections import deque
 class EconomicAgent(mesa.Agent):
     'wealth-maximising agent'
     def __init__(self, unique_id, model, trading_skill):
+        """
+        Initialize an EconomicAgent instance, an EU-maximizing agent within an agent-based model.
+
+        Attributes:
+        - unique_id (int): A unique identifier for this agent.
+        - model (mesa.Model): The model instance to which this agent belongs.
+        - trading_skill (float): Skill level of the agent affecting the outcome of trading transactions.
+        - starting_wealth (float): Initial wealth of the agent, randomly set between 1 and 10.
+        - wealth (float): Current wealth of the agent, starts equal to starting_wealth.
+        - prosperity (float): Fixed prosperity multiplier for trading calculations, set to 1.
+        - criminality (float): Mutable attribute to represent the agent's tendency towards criminal actions, initialized to 0.
+        - num_interactions (int): Counter for the number of interactions (trades or thefts) this agent has participated in.
+        - num_crimes_witnessed (int): Number of crimes this agent has witnessed.
+        - num_punishments_witnessed (int): Number of times this agent has witnessed punishments for crimes.
+        - num_been_crimed (int): Number of times this agent has been a victim of theft.
+        - total_trading_gain (float): Cumulative gain from trading.
+        - total_stealing_gain (float): Cumulative gain from thefts committed.
+        - crimes_committed_agent (int): Total number of crimes committed by this agent.
+        - amount_arrested (int): Number of times this agent has been arrested.
+        - q_incomes (collections.deque): Queue recording the financial outcomes of recent interactions.
+        - q_crime_perception (collections.deque): Queue recording perceptions of crime and punishment.
+        - q_interactions (collections.deque): Queue recording the types of recent interactions (0 for trade, 1 for theft).
+        - has_traded_this_turn (bool): Flag indicating if the agent has traded in the current step.
+        - has_committed_crime_this_turn (bool): Flag indicating if the agent has committed a crime in the current step.
+        - is_arrested (bool): Status flag if the agent is currently arrested.
+        - time_until_released (int): Countdown timer for how many steps until the agent is released from jail.
+        - risk_aversion (float): Agent's aversion to risk, influencing decisions in trading and criminal activities.
+
+        Parameters:
+        - unique_id (int): A unique identifier for this agent.
+        - model (object): The model instance this agent is part of.
+        - trading_skill (float): Skill level affecting trading efficiency and outcomes.
+        """
         super().__init__(unique_id, model)
         
         #agent's attributes:
