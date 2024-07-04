@@ -1,5 +1,9 @@
-matplotlib
-numpy
-numba
-pandas
-scipy
+mesa==2.3.0
+numpy==1.24.3
+pandas==2.2.2
+matplotlib==3.7.1
+seaborn==0.12.2
+scipy==1.11.4
+joblib==1.2.0
+SALib==1.5.0
+pickle-mixin
