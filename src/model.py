@@ -4,6 +4,18 @@ import numpy as np
 from agent import EconomicAgent, CopAgent
 
 def compute_gini(model):
+    """
+        Calculate the Gini coefficient for a given model.
+
+        The Gini coefficient is a measure of inequality in a distribution,
+        represented here by wealth among economic agents within the model.
+
+        Parameters:
+        - model (mesa.Model): The simulation model containing the agents.
+
+        Returns:
+        - float: The Gini coefficient, where 0 represents perfect equality and 1 represents maximum inequality.
+    """
     agent_wealths = [agent.wealth for agent in model.schedule.agents if isinstance(agent, EconomicAgent)]
     x = sorted(agent_wealths)
     N = model.num_agents
@@ -12,6 +24,23 @@ def compute_gini(model):
 
 class EconomicModel(mesa.Model):
     def __init__(self, num_econ_agents, initial_cops=0, width=20, height=20, election_frequency = 70, sentence_length = 20, interaction_memory = 50, risk_aversion_std = 0.3, trading_skill_std = 0.3, tax_per_cop = 0.01):
+        """
+        Initialize an instance of EconomicModel
+
+        Parameters:
+        - num_econ_agents (int): The number of economic agents in the simulation.
+        - initial_cops (int): Initial number of cop agents.
+        - width (int): The width of the grid.
+        - height (int): The height of the grid.
+        - election_frequency (int): The number of steps between elections.
+        - sentence_length (int): The duration of punishment for crimes (not explicitly used).
+        - interaction_memory (int): The memory length for interactions among agents.
+        - risk_aversion_std (float): The standard deviation for the distribution of risk aversion among agents.
+        - trading_skill_std (float): The standard deviation for the distribution of trading skills among agents.
+        - tax_per_cop (float): The tax rate increment per cop agent.
+
+        Initializes agents, grid, scheduler, data collectors, and other parameters.
+        """
         super().__init__()
         self.num_agents = num_econ_agents
         self.num_cops = int(initial_cops)
@@ -80,6 +109,14 @@ class EconomicModel(mesa.Model):
             })
 
     def step(self):
+        """
+        Execute one step of the model simulation.
+
+        This includes activating the agents, potentially adjusting the tax rate and the number of cops based on election outcomes, and collecting data.
+
+        Elections are held at intervals defined by the election_frequency parameter.
+        Adjustments to the tax rate and the number of cops are made based on the election results.
+        """
         self.steps += 1
         self.schedule.step()
         if (self.steps - 1) % self.election_frequency == 0 and self.steps != 1:
