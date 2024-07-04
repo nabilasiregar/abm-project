@@ -9,7 +9,7 @@ This repository contains the source code for an agent-based model simulation usi
 ## Running the simulation
 To visualize the agent-based model via a web interface, run the following command from the root of the repository: : `mesa runserver src`
 
-## Sensitivity Analysis
+## Running the experiment
 TODO
 
 ## Notebooks
@@ -19,18 +19,22 @@ To generate figures in our report, run all `analysis.ipynb`	and `global_sensitiv
 ```bash
    ├── README.md
    ├── notebooks
-   │   └── analysis.ipynb
+   │   ├── analysis.ipynb
+   │   └── global_sensitivity_analysis.ipynb
    ├── requirements.txt
    ├── results
    ├── src
    │   ├── agent.py
    │   ├── extra_analysis.py
    │   ├── model.py
-   │   ├── parallel_run_global.py
    │   ├── parallel_run.py
+   │   ├── parallel_run_global.py
    │   ├── plot.py
    │   └── run.py
    └── static
+      ├── extra_graphs
+      ├── icons
+      └── plot
 ```
 - **/notebooks**: Contains Jupyter notebooks for analysis and to generate plots in our report 
 - **/results**: Stores simulation output results, currently ignored from being committed due to large file size
