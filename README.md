@@ -9,38 +9,19 @@ This repository contains the source code for an agent-based model simulation usi
 ## Directory structure
 ```bash
    ├── README.md
-
-   ├── **notebooks**
-
-   │ └── analysis.ipynb
-
+   ├── notebooks
+   │   └── analysis.ipynb
    ├── requirements.txt
-
-   ├── **results**
-
-   ├── **src**
-
-   │ ├── agent.py
-
-   │ ├── batch_run.py
-
-   │ ├── extra_analysis.py
-
-   │ ├── model.py
-
-   │ ├── parallel_run.py
-
-   │ ├── plot.py
-
-   │ └── run.py
-
-   └── **static**
-
-   ├── **extra_graphs**
-
-   ├── **icons**
-
-   └── **plot**
+   ├── results
+   ├── src
+   │   ├── agent.py
+   │   ├── batch_run.py
+   │   ├── extra_analysis.py
+   │   ├── model.py
+   │   ├── parallel_run.py
+   │   ├── plot.py
+   │   └── run.py
+   └── static
 ```
 - **/notebooks**: Contains Jupyter notebooks for analysis and to generate plots in our report 
 - **/results**: Stores simulation output results, which include various metrics and states captured during the simulation runs. 
