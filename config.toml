@@ -1,0 +1,29 @@
+[defaults]
+num_econ_agents = 200
+initial_cops = 2
+width = 20
+height = 20
+election_frequency = 70
+sentence_length = 20
+interaction_memory = 50
+risk_aversion_std = 0.3
+trading_skill_std = 0.3
+tax_per_cop = 0.01
+
+[bounds]
+election_frequency = [10, 100]
+sentence_length = [5, 90]
+interaction_memory = [10, 100]
+risk_aversion_std = [0.1, 0.9]
+trading_skill_std = [0.1, 0.9]
+tax_per_cop = [0.01, 0.1]
+num_econ_agents = [100, 300]
+initial_cops = [10, 60]
+width = [20, 40]
+height = [20, 40]
+
+[simulation]
+num_samples = 10
+num_iterations = 200
+max_steps = 500
+save_agent_data = false
