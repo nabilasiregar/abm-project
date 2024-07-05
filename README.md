@@ -1,5 +1,5 @@
 # Agent-Based Modelling
-This repository contains the source code for an agent-based model simulation using the Mesa framework. The simulation includes various aspects such as economic and cop agent interactions, crime dynamics, and policy effects through taxation and policing.
+This repository contains the source code for an agent-based model simulation using the Mesa framework. The simulation includes various aspects such as economic and cop agent interactions, crime dynamics through sentence length (punishment severity) and level of policing (likelihood of getting caught).
 <p align="center">
   <img src="static/simulation.gif" alt="Simulation" width="300" height="300"/>
 </p>
