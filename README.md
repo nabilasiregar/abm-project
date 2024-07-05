@@ -1,6 +1,9 @@
 # Agent-Based Modelling
 This repository contains the source code for an agent-based model simulation using the Mesa framework. The simulation includes various aspects such as economic and cop agent interactions, crime dynamics, and policy effects through taxation and policing.
-![](static/simulation.gif)
+<p align="center">
+  <img src="static/simulation.gif" alt="Simulation" width="500" height="500"/>
+</p>
+
 
 ## Installation
 1. Clone the repository
@@ -9,7 +12,7 @@ This repository contains the source code for an agent-based model simulation usi
    pip install -r requirements.txt
 ```
 
-## Running the simulation
+## Demo
 To visualize the agent-based model via a web interface, run the following command from the root of the repository: 
 ```bash
    mesa runserver src
