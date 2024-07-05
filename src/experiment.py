@@ -7,7 +7,6 @@ import mesa
 from model import EconomicModel
 from agent import EconomicAgent, CopAgent
 
-
 def run_simulation(params, max_steps, iteration, save_agent_data):
     print(f"Iteration {iteration + 1} with params: {params}")
     model = EconomicModel(**params)
