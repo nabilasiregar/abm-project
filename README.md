@@ -35,7 +35,9 @@ To generate figures in our report, run all `analysis.ipynb`	and `global_sensitiv
 
 ## Directory structure
 ```bash
+   ├── LICENSE
    ├── README.md
+   ├── config.toml
    ├── notebooks
    │   ├── analysis.ipynb
    │   └── global_sensitivity_analysis.ipynb
@@ -54,6 +56,7 @@ To generate figures in our report, run all `analysis.ipynb`	and `global_sensitiv
       ├── icons
       └── plot
 ```
+- **config.toml**: Configuration file to run the experiment
 - **/notebooks**: Contains Jupyter notebooks for analysis and to generate plots in our report 
 - **/results**: Stores simulation output results, currently ignored from being committed due to large file size
 - **agent.py**: Defines the `EconomicAgent` and `CopAgent` classes. 
