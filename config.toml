@@ -24,6 +24,6 @@ height = [20, 40]
 
 [simulation]
 num_samples = 10
-num_iterations = 200
+num_iterations = 100
 max_steps = 500
 save_agent_data = false
