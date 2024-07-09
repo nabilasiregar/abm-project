@@ -7,8 +7,8 @@ import mesa
 from model import EconomicModel
 from agent import EconomicAgent, CopAgent
 
-def run_simulation(params, max_steps, iteration, save_agent_data):
-    print(f"Iteration {iteration + 1} with params: {params}")
+def run_simulation(params, max_steps, iteration, save_agent_data, total_iterations):
+    print(f"Running iteration {iteration + 1}/{total_iterations}, with parameters: {params}")
     model = EconomicModel(**params)
     for i in range(max_steps):
         model.step()
@@ -29,16 +29,14 @@ def generate_params(bounds, num_samples, vary_param, default_params):
     params_list = []
     if vary_param:
         is_integer = vary_param in ['num_econ_agents', 'initial_cops', 'width', 'height', 'election_frequency', 'sentence_length', 'interaction_memory']
-
         dtype = int if is_integer else float
         values = np.linspace(*bounds[vary_param], num=num_samples, dtype=dtype)
-
         for value in values:
             params = default_params.copy()
             params[vary_param] = value
             params_list.append(params)
     else:
-        params_list = [default_params] * num_samples
+        params_list = [default_params]
     return params_list
 
 
@@ -56,9 +54,9 @@ def run(config_path, vary_param=None):
     params_list = generate_params(bounds, num_samples, vary_param, default_params)
 
     results = Parallel(n_jobs=-1)(
-        delayed(run_simulation)(params, max_steps, i, save_agent_data)
-        for i in range(num_iterations)
+        delayed(run_simulation)(params, max_steps, i, save_agent_data, num_iterations)
         for params in params_list
+        for i in range(num_iterations)
     )
 
     model_results = [model_df for model_df, _ in results]
